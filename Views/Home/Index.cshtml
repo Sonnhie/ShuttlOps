@@ -1,8 +1,17 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="d-flex flex-column gap-4">
+    <div>
+        <h1 class="h3 fw-bold mb-1">Dashboard</h1>
+        <p class="text-muted mb-0">Monitor shuttle operations and request activity.</p>
+    </div>
+
+    <div class="card">
+        <div class="card-body p-4">
+            <h2 class="h5 fw-bold mb-2">Operations Overview</h2>
+            <p class="text-muted mb-0">Use the navigation to review requests, schedules, and operational tools available to your role.</p>
+        </div>
+    </div>
 </div>

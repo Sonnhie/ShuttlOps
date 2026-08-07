@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+﻿@* <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -6,44 +6,250 @@
     <title>@ViewData["Title"] - ShuttlOps</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/ShuttlOps.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/lib/toastr/toastr.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/lib/datatables/datatables.min.css" asp-append-version="true" />
+    <link href="~/lib/sweetalert/sweetalert2.min.css" rel="stylesheet" asp-append-version="true">
+    <script src="~/lib/sweetalert/sweetalert2.min.js" asp-append-version="true"></script>
+    <link rel="stylesheet" href="~/lib/flatpickr/flatpickr.min.css" asp-append-version="true">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">ShuttlOps</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+    @Html.AntiForgeryToken()
+    <div class="d-flex" id="wrapper">
+        <div id="sidebar-wrapper">
+            <div class="d-flex justify-content-xl-start ms-3">
+                <div class="sidebar-heading d-flex align-items-center py-4 ">
+                    <span class="text-primary fs-5 fw-bold tracking-wide">
+                        <i class="bi bi-car-front-fill me-3"></i>
+                        ShuttlOps
+                    </span>
                 </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - ShuttlOps - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            @await Component.InvokeAsync("Sidebar")
         </div>
-    </footer>
+        <button class="sidebar-backdrop" id="sidebar-backdrop" type="button" aria-label="Close navigation"></button>
+
+        <div id="content-wrapper">
+            <nav class="navbar navbar-expand-lg navbar-light py-3 px-4">
+                <div class="container-fluid p-0 d-flex align-items-center">
+                    <button class="btn btn-link text-dark p-0 me-3 border-0" id="menu-toggle" type="button" aria-label="Toggle navigation">
+                        <i class="bi bi-list fs-3"></i>
+                    </button>
+
+                    <span class="navbar-brand fw-semibold text-secondary" style="font-size: 0.95rem;">
+                        @ViewData["Title"]
+                    </span>
+
+                    <div class="ms-auto d-flex align-items-center">
+                        <div class="dropdown">
+                            <button class="btn btn-link nav-link dropdown-toggle text-dark border-0 p-2 fs-7 fw-medium" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="bg-primary bg-opacity-10 text-primary p-2 rounded-circle me-1">
+                                    <i class="bi bi-person small"></i>
+                                </span>
+                                Hello, @(User.Identity?.Name ?? "User")
+                            </button>
+
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow" style="background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-radius: 0.75rem;">
+                                <li>
+                                    <a class="dropdown-item fs-7 py-2" href="#">
+                                        <i class="bi bi-person-circle me-2 text-muted"></i> Profile
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider opacity-25"></li>
+                                <li>
+                                    <a class="dropdown-item fs-7 text-danger py-2" id="logout" href="#">
+                                        <i class="bi bi-box-arrow-right me-2"></i> Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="container-fluid px-4 px-lg-5 py-4">
+                <main role="main" id="main-content" class="pb-3">
+                    @RenderBody()
+                </main>
+            </div>
+        </div>
+    </div>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/flatpickr/flatpickr.min.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/lib/toastr/toastr.min.js"></script>
+    <script src="~/lib/datatables/datatables.min.js"></script>
+    <script src="~/js/common.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+             const toggleButton = document.getElementById("menu-toggle");
+             const wrapper = document.getElementById("wrapper");
+             const sidebarBackdrop = document.getElementById("sidebar-backdrop");
+
+             if (toggleButton && wrapper) {
+                 toggleButton.addEventListener("click", function (e) {
+                     e.preventDefault();
+                     wrapper.classList.toggle("toggled");
+                 });
+             }
+
+             if (sidebarBackdrop && wrapper) {
+                 sidebarBackdrop.addEventListener("click", function () {
+                     wrapper.classList.remove("toggled");
+                 });
+             }
+
+             document.querySelectorAll("#sidebar-wrapper a").forEach(function (link) {
+                 link.addEventListener("click", function () {
+                     if (!link.hasAttribute("data-bs-toggle") && window.matchMedia("(max-width: 768px)").matches) {
+                         wrapper.classList.remove("toggled");
+                     }
+                 });
+             });
+         });
+    </script>
+</body>
+</html> *@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ShuttlOps</title>
+
+    <!-- Core & Vendor Styles -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="~/lib/toastr/toastr.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/lib/datatables/datatables.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/lib/sweetalert/sweetalert2.min.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/lib/flatpickr/flatpickr.min.css" asp-append-version="true">
+
+    <!-- Custom Application Styles -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="app-body">
+    @Html.AntiForgeryToken()
+    <div class="d-flex" id="wrapper">
+
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar-wrapper" class="glass-sidebar shadow-sm">
+            <div class="sidebar-heading-container px-4 py-3 border-bottom d-flex align-items-center">
+                <a class="navbar-brand d-flex align-items-center text-primary fs-5 fw-bold tracking-wide" href="~/">
+                    <div class="brand-icon-bg bg-primary bg-opacity-10 p-2 rounded-3 me-2.5 d-flex align-items-center justify-content-center">
+                        <i class="bi bi-car-front-fill fs-5 text-primary"></i>
+                    </div>
+                    <span>ShuttlOps</span>
+                </a>
+            </div>
+
+            @await Component.InvokeAsync("Sidebar")
+        </aside>
+
+        <button class="sidebar-backdrop" id="sidebar-backdrop" type="button" aria-label="Close navigation"></button>
+
+        <!-- Main Content Area -->
+        <div id="content-wrapper" class="d-flex flex-column flex-grow-1">
+
+            <!-- Sticky Glass Top Navbar -->
+            <header class="navbar navbar-expand-lg sticky-top px-4 py-2.5 glass-navbar border-bottom">
+                <div class="container-fluid p-0 d-flex align-items-center">
+
+                    <button class="btn btn-icon me-3 border-0 rounded-circle p-2" id="menu-toggle" type="button" aria-label="Toggle navigation">
+                        <i class="bi bi-list fs-4"></i>
+                    </button>
+
+                    <!-- Dynamic Page Title -->
+                    <!-- Responsive Title Container -->
+                    <div class="d-flex align-items-center me-2 text-truncate" style="max-width: 50vw;">
+                        <span class="fw-semibold text-dark fs-6 text-truncate">
+                            @ViewData["Title"]
+                        </span>
+                    </div>
+                    <!-- User Profile Dropdown -->
+                    <div class="ms-auto d-flex align-items-center gap-3">
+                        <div class="dropdown">
+                            <button class="btn btn-user-dropdown d-flex align-items-center gap-2 border-0 bg-transparent px-2 py-1.5 rounded-pill" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="avatar-circle bg-primary bg-opacity-10 text-primary fw-bold small">
+                                    @(User.Identity?.Name?.Substring(0, 1).ToUpper() ?? "U")
+                                </span>
+                                <span class="fw-medium text-dark small d-none d-sm-inline">
+                                    @(User.Identity?.Name ?? "User")
+                                </span>
+                                <i class="bi bi-chevron-down opacity-50 small"></i>
+                            </button>
+
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg glass-dropdown mt-2 py-2">
+                                <li>
+                                    <a class="dropdown-item fs-7 py-2 d-flex align-items-center" href="#">
+                                        <i class="bi bi-person-circle me-2.5 text-muted"></i> Profile Settings
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider opacity-10"></li>
+                                <li>
+                                    <a class="dropdown-item fs-7 text-danger py-2 d-flex align-items-center" id="logout" href="#">
+                                        <i class="bi bi-box-arrow-right me-2.5"></i> Sign Out
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Body Content -->
+            <main role="main" id="main-content" class="container-fluid px-4 px-lg-5 py-4 flex-grow-1">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <!-- Core Scripts -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/flatpickr/flatpickr.min.js" asp-append-version="true"></script>
+    <script src="~/lib/sweetalert/sweetalert2.min.js" asp-append-version="true"></script>
+    <script src="~/lib/toastr/toastr.min.js"></script>
+    <script src="~/lib/datatables/datatables.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/common.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const toggleButton = document.getElementById("menu-toggle");
+            const wrapper = document.getElementById("wrapper");
+            const sidebarBackdrop = document.getElementById("sidebar-backdrop");
+
+            if (toggleButton && wrapper) {
+                toggleButton.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    wrapper.classList.toggle("toggled");
+                });
+            }
+
+            if (sidebarBackdrop && wrapper) {
+                sidebarBackdrop.addEventListener("click", function () {
+                    wrapper.classList.remove("toggled");
+                });
+            }
+
+            document.querySelectorAll("#sidebar-wrapper a").forEach(function (link) {
+                link.addEventListener("click", function () {
+                    if (!link.hasAttribute("data-bs-toggle") && window.matchMedia("(max-width: 768px)").matches) {
+                        wrapper.classList.remove("toggled");
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

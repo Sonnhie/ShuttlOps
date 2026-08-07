@@ -7,10 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="ViewComponents\" />
-    <Folder Include="Views\Pages\Admin\" />
+    <Folder Include="Repositories\" />
+    <Folder Include="Views\NewFolder\" />
     <Folder Include="Views\Pages\Components\" />
-    <Folder Include="Views\Pages\User\" />
   </ItemGroup>
 
   <ItemGroup>

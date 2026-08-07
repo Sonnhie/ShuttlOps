@@ -1,22 +1,28 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
-using ShuttlOps.DBconnection;
+using ShuttlOps.Models;
 using ShuttlOps.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddRazorPages()
+.AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.PropertyNamingPolicy = null;
+});
 
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
+builder.Services.AddAuthentication("Login")
+    .AddCookie("Login", options =>
     {
         options.Cookie.Name = "Login";
-        options.LoginPath = "/Login";
-        options.AccessDeniedPath = "/AccessDenied"; 
-        options.ExpireTimeSpan = TimeSpan.FromHours(8); 
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/AccessDenied";
+        options.ExpireTimeSpan = TimeSpan.FromHours(8);
     });
+
+builder.Services.AddDbContext<ShuttlOpsDbContext>(options =>
+    options.UseSqlServer(connectionString));
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddMyAppServices();
@@ -25,6 +31,11 @@ builder.Services.AddControllersWithViews();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddAntiforgery(options =>
+{
+    // ⚡ Tells ASP.NET Core to look for the token in HTTP Headers
+    options.HeaderName = "RequestVerificationToken";
+});
 
 var app = builder.Build();
 

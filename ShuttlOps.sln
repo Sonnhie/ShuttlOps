@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.37203.1 d17.14
+VisualStudioVersion = 17.14.37203.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShuttlOps", "ShuttlOps.csproj", "{A75EB787-CBDF-4C67-91C5-1F62141EF439}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShuttlOpsSystem.Test", "..\ShuttlOpsSystem.Test\ShuttlOpsSystem.Test.csproj", "{3D7252DB-AE08-4F80-AF5E-04274A92F72E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{A75EB787-CBDF-4C67-91C5-1F62141EF439}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A75EB787-CBDF-4C67-91C5-1F62141EF439}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A75EB787-CBDF-4C67-91C5-1F62141EF439}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D7252DB-AE08-4F80-AF5E-04274A92F72E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D7252DB-AE08-4F80-AF5E-04274A92F72E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D7252DB-AE08-4F80-AF5E-04274A92F72E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D7252DB-AE08-4F80-AF5E-04274A92F72E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,22 +1,488 @@
-html {
-  font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+﻿:root {
+    /* Main Background & Accent Colors */
+    --bg-light: #f8fafc;
+    --brand-blue: #0d6efd;
+    --brand-blue-hover: #0b5ed7;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --sidebar-width: 260px;
+    /* LIGHT GLASS SIDEBAR PALETTE (Matching Login Glass Effect) */
+    --sidebar-bg: rgba(255, 255, 255, 0.85); /* Same as login .glass-effect */
+    --sidebar-border: rgba(226, 232, 240, 0.8);
+    --sidebar-text: #475569;
+    /* Interactive States */
+    --sidebar-hover-bg: rgba(238, 242, 255, 0.8); /* Very soft blue tint */
+    --sidebar-hover-text: #0d6efd;
+    /* Active Nav Item (Linear Gradient matching .btn-login) */
+    --accent-bg: linear-gradient(135deg, #0d6efd, #0b5ed7);
+    --accent-color: #ffffff;
+    --accent-shadow: 0 8px 18px rgba(13, 110, 253, 0.25);
 }
 
 body {
-  margin-bottom: 60px;
+    /* Same background as login */
+    background: linear-gradient(-45deg, #f3f4f6, #e2e8f0, #dbeafe, #f3e8ff);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
+    color: var(--text-main);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+}
+
+@keyframes gradientBG {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+#wrapper {
+    width: 100%;
+}
+
+/* ==========================================================================
+   SIDEBAR CONTAINER (FROSTED GLASS EFFECT)
+   ========================================================================== */
+#sidebar-wrapper {
+    width: var(--sidebar-width);
+    /* Frosted glass backdrop matching .glass-effect */
+    background: var(--sidebar-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-right: 1px solid var(--sidebar-border);
+    min-height: 100vh;
+    transition: transform 0.3s ease;
+    overflow-x: hidden;
+    overflow-y: auto;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 1000;
+    box-shadow: 5px 0 25px rgba(0, 0, 0, 0.03);
+}
+
+#content-wrapper {
+    flex-grow: 1;
+    margin-left: var(--sidebar-width);
+    min-height: 100vh;
+    width: calc(100% - var(--sidebar-width));
+    transition: all 0.3s ease;
+}
+
+.sidebar-backdrop {
+    display: none;
+}
+
+/* Sidebar Toggle Logic */
+#wrapper.toggled #sidebar-wrapper {
+    transform: translateX(-100%);
+}
+
+#wrapper.toggled #content-wrapper {
+    margin-left: 0;
+    width: 100%;
+}
+
+/* ==========================================================================
+   NAVIGATION LIST ITEMS
+   ========================================================================== */
+.list-group-item {
+    border: none !important;
+    padding: 0.75rem 1rem;
+    margin: 0.25rem 0.75rem;
+    border-radius: 0.75rem; /* Matches input rounded corners */
+    background-color: transparent !important;
+    color: var(--sidebar-text) !important;
+    font-size: 0.925rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+    .list-group-item:hover {
+        background-color: var(--sidebar-hover-bg) !important;
+        color: var(--sidebar-hover-text) !important;
+        transform: translateX(3px);
+    }
+
+/* ACTIVE NAV STATE (Uses exact .btn-login gradient) */
+.active-nav {
+    background: var(--accent-bg) !important;
+    color: var(--accent-color) !important;
+    font-weight: 600 !important;
+    box-shadow: var(--accent-shadow);
+}
+/* Protect the active nav item from hover color conflicts */
+.list-group-item.active-nav:hover {
+    color: #ffffff !important; /* Keep text white */
+}
+
+    .list-group-item.active-nav:hover i {
+        color: #ffffff !important; /* Keep icon white */
+    }
+
+/* Ensure normal icons turn blue on hover (but not active ones) */
+.list-group-item:not(.active-nav):hover i {
+    color: var(--sidebar-hover-text) !important;
+}
+
+    .active-nav i {
+        color: #ffffff !important;
+    }
+
+/* ==========================================================================
+   SUBMENUS (Clean Indentation & Soft Left Border)
+   ========================================================================== */
+[id$="Submenu"] {
+    width: 100%;
+}
+
+    [id$="Submenu"] .list-group-item {
+        color: var(--text-muted) !important;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        padding-left: 2.75rem !important;
+        margin: 0.2rem 0.75rem !important;
+        border-left: 2px solid #cbd5e1 !important;
+        border-radius: 0 0.5rem 0.5rem 0;
+        font-size: 0.875rem;
+    }
+
+        [id$="Submenu"] .list-group-item:hover {
+            background-color: var(--sidebar-hover-bg) !important;
+            color: var(--sidebar-hover-text) !important;
+            border-left-color: var(--brand-blue) !important;
+        }
+
+        /* Ensure active sub-menu items have visible white text */
+        [id$="Submenu"] .list-group-item.active-nav,
+        [id$="Submenu"] .list-group-item.active-nav:hover {
+            color: #ffffff !important;
+            border-left-color: #ffffff !important; /* Matches active theme */
+        }
+
+            /* Ensure sub-menu icons are also white when active */
+            [id$="Submenu"] .list-group-item.active-nav i {
+                color: #ffffff !important;
+            }
+
+/* ==========================================================================
+   CHEVRON ROTATION ANIMATION
+   ========================================================================== */
+[data-bs-toggle="collapse"] .bi-chevron-right {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+[data-bs-toggle="collapse"]:not(.collapsed) .bi-chevron-right,
+[data-bs-toggle="collapse"][aria-expanded="true"] .bi-chevron-right {
+    transform: rotate(90deg);
+}
+
+/* ==========================================================================
+   TOP NAVBAR & GLASS CARDS
+   ========================================================================== */
+.navbar {
+    background: rgba(255, 255, 255, 0.75) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.6) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03) !important;
+}
+
+/* Dashboard Cards (Re-use Glass Effect from Login) */
+.card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 1.25rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+}
+
+/* ==========================================================================
+   MODALS & POPUPS
+   ========================================================================== */
+.modal-backdrop.show,
+.swal2-container.swal2-backdrop-show {
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    background-color: rgba(15, 23, 42, 0.3) !important;
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+@media (max-width: 768px) {
+    #sidebar-wrapper {
+        transform: translateX(-100%);
+        z-index: 1050;
+    }
+
+    #content-wrapper {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    #wrapper.toggled #sidebar-wrapper {
+        transform: translateX(0);
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.15);
+    }
+
+    #wrapper.toggled .sidebar-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 1040;
+        border: 0;
+        background: rgba(15, 23, 42, 0.28);
+        backdrop-filter: blur(2px);
+        -webkit-backdrop-filter: blur(2px);
+    }
+}
+
+/*Datatables*/
+/* =========================================
+   ENTERPRISE DATATABLES OVERRIDES
+   ========================================= */
+
+table.dataTable thead th {
+    background-color: #f8fafc !important;
+    color: #64748b;
+    border-bottom: 1px solid #e2e8f0 !important;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    padding: 0.875rem 0.75rem;
+    text-transform: uppercase;
+}
+
+table.dataTable tbody td {
+    padding: 1rem 0.75rem;
+    color: #495057;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+div.dt-container div.dt-search input,
+div.dt-container div.dt-length select {
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    box-shadow: none;
+    transition: border-color 0.15s ease-in-out;
+}
+
+div.dt-container div.dt-search input:focus,
+div.dt-container div.dt-length select:focus {
+    border-color: #86b7fe;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+div.dt-container div.dt-search label {
+    font-weight: 500;
+    color: #495057;
+}
+
+div.dt-container div.dt-paging ul.pagination .page-link {
+    border: none;
+    border-radius: 0.375rem;
+    margin: 0 0.125rem;
+    color: #495057;
+    font-weight: 500;
+}
+
+div.dt-container div.dt-paging ul.pagination .page-item.active .page-link {
+    background-color: #0d6efd;
+    color: white;
+    box-shadow: 0 0.125rem 0.25rem rgba(13, 110, 253, 0.4);
+}
+
+div.dt-container div.dt-paging ul.pagination .page-link:hover:not(.active) {
+    background-color: #f8f9fa;
+}
+
+
+/* Application Base Body */
+.app-body {
+    background-color: #f8fafc;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: #334155;
+}
+
+/* Glassmorphism Navbar & Dropdown */
+.glass-navbar {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.glass-dropdown {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 0.75rem;
+}
+
+/* Sidebar Styles */
+.glass-sidebar {
+    background: #ffffff;
+    border-right: 1px solid #e2e8f0;
+}
+
+/* Navigation Custom Links */
+.nav-link-custom {
+    color: #64748b;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+    .nav-link-custom:hover {
+        color: #0d6efd;
+        background-color: rgba(13, 110, 253, 0.06);
+    }
+
+    .nav-link-custom.active, .nav-link-custom.active-parent {
+        color: #0d6efd;
+        background-color: rgba(13, 110, 253, 0.1);
+        font-weight: 600;
+    }
+
+.nav-link-sub {
+    color: #64748b;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+    .nav-link-sub:hover, .nav-link-sub.active {
+        color: #0d6efd;
+        font-weight: 600;
+    }
+
+/* Submenu Arrow Rotation */
+.submenu-arrow {
+    transition: transform 0.25s ease;
+}
+
+[aria-expanded="true"] .submenu-arrow {
+    transform: rotate(90deg);
+}
+
+/* User Avatar Badge */
+.avatar-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Mobile Off-Canvas Drawer Sidebar (<= 768px) */
+@media (max-width: 768px) {
+    #sidebar-wrapper {
+        position: fixed;
+        top: 0;
+        left: -260px;
+        width: 260px;
+        height: 100vh;
+        z-index: 1045;
+        transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    #wrapper.toggled #sidebar-wrapper {
+        left: 0;
+    }
+
+    /* Dimmed Backdrop Overlay when Sidebar is open */
+    .sidebar-backdrop {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(15, 23, 42, 0.4);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        z-index: 1040;
+        border: none;
+    }
+
+    #wrapper.toggled .sidebar-backdrop {
+        display: block;
+    }
+
+    /* Optimize padding on mobile main content container */
+    main#main-content {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+}
+
+/* Touch Target Size Optimization (44px min height for mobile accessibility) */
+.btn, .form-control, .input-group-text, .nav-link-custom {
+    min-height: 44px;
+}
+
+
+.queue-card {
+    background-color: #ffffff;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+    .queue-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
+    }
+
+.status-badge {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    text-transform: uppercase;
+}
+/* Flashing / Pulsing animation for active departures */
+.pulse-boarding {
+    animation: pulse-green-light 1.5s infinite;
+}
+
+@keyframes pulse-green-light {
+    0% {
+        box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.5);
+    }
+
+    70% {
+        box-shadow: 0 0 0 8px rgba(25, 135, 84, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(25, 135, 84, 0);
+    }
+}
+
+.time-display {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.5px;
 }

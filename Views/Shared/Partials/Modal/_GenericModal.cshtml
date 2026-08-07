@@ -1,0 +1,43 @@
+﻿@model ShuttlOps.DTOs.ReusableModalDTO
+@{
+}
+
+
+<div class="modal fade rounded" id="@Model.ModalId" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+
+            <div class="modal-header bg-light border-bottom-0">
+                <h5 class="modal-title fw-bold" id="permissionModalLabel">
+                    <i class="bi @Model.ModalIcon me-2 text-muted"></i> @Model.ModalTitle
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.FormId))
+            {
+                <form id="@Model.FormId" method="post">
+                    <div class="modal-body p-4">
+                        <partial name="@Model.BodyPartialName" />
+                    </div>
+
+                    <div class="modal-footer bg-light border-top-0">
+                        <button type="button" class="btn btn-white border shadow-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary shadow-sm px-4">@Model.SubmitButtonText</button>
+                    </div>
+                </form>
+            }
+            else
+            {
+                <div class="modal-body p-4">
+                    <partial name="@Model.BodyPartialName" />
+                </div>
+
+                <div class="modal-footer bg-light border-top-0">
+                    <button type="button" class="btn btn-white border shadow-sm" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>

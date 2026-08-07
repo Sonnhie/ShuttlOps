@@ -4,9 +4,9 @@
     {
         public static IServiceCollection AddMyAppServices(this IServiceCollection services)
         {
-            //services.AddScoped<AuthenticationServices>();
-            //services.AddScoped<UserManagementService>();
-            //services.AddScoped<AdminManagementService>();
+            services.AddScoped<IAuthenticationservice, Authenticationservice>();
+            services.AddScoped<IRequestService, RequestService>();
+            services.AddScoped<IAdminservice, AdminService>();
 
             return services;
         }
