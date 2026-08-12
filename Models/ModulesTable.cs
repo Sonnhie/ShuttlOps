@@ -12,4 +12,6 @@ public partial class ModulesTable
     public string? Description { get; set; }
 
     public bool IsActive { get; set; }
+
+    public virtual ICollection<PermissionsTable> PermissionsTables { get; set; } = new List<PermissionsTable>();
 }

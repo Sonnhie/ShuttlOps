@@ -4,47 +4,51 @@
     var todayDate = DateOnly.FromDateTime(DateTime.Now);
 }
 
-<div class="d-flex flex-column gap-4">
+<div class="d-flex flex-column gap-3 mb-4">
     <div>
-        <h1 class="h3 fw-bold mb-1">Create Trip Ticket</h1>
-        <p class="text-muted mb-0">Submit a new trip ticket request for approval and vehicle dispatch.</p>
+        <h1 class="h4 fw-bold text-dark mb-1">Create Trip Ticket</h1>
+        <p class="text-muted small mb-0">Submit a new trip ticket request for approval and vehicle dispatch.</p>
     </div>
 
     <form method="post" class="d-flex flex-column gap-4" id="createticket">
         @Html.AntiForgeryToken()
 
         <!-- 1. TRIP SCHEDULE -->
-        <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-header bg-white py-3 border-bottom">
-                <h5 class="card-title fw-bold text-primary mb-0">
+        <div class="card">
+            <div class="card-header bg-transparent py-3 border-bottom px-4">
+                <h6 class="fw-semibold text-primary mb-0 d-flex align-items-center">
                     <i class="bi bi-calendar-event me-2"></i>Trip Schedule
-                </h5>
+                </h6>
             </div>
             <div class="card-body p-4">
-                <div class="row g-3">
+                <div class="row g-4">
                     <div class="col-12 col-md-4">
-                        <label asp-for="DateRequested" class="form-label fw-semibold">Date Requested</label>
+                        <label asp-for="DateRequested" class="form-label fw-medium text-dark small">Date Requested</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light text-muted"><i class="bi bi-calendar-check"></i></span>
-                            <input asp-for="DateRequested" class="form-control bg-light modern-datepicker" type="date" value="@DateTime.Now.ToString("yyyy-MM-dd")" readonly />
+                            <span class="input-group-text bg-light text-muted border-end-0">
+                                <i class="bi bi-calendar-check"></i>
+                            </span>
+                            <input asp-for="DateRequested" class="form-control bg-light border-start-0 modern-datepicker px-2" type="date" value="@DateTime.Now.ToString("yyyy-MM-dd")" readonly />
                         </div>
                     </div>
 
                     <div class="col-12 col-md-4">
-                        <label asp-for="DateOfTrip" class="form-label fw-semibold">Date of Trip</label>
+                        <label asp-for="DateOfTrip" class="form-label fw-medium text-dark small">Date of Trip</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light text-muted"><i class="bi bi-calendar3"></i></span>
-                            <input asp-for="DateOfTrip" class="form-control modern-datepicker" type="date" value="@todayDate.ToString("yyyy-MM-dd")" min="@todayDate.ToString("yyyy-MM-dd")" required />
+                            <span class="input-group-text bg-white text-muted border-end-0">
+                                <i class="bi bi-calendar3"></i>
+                            </span>
+                            <input asp-for="DateOfTrip" class="form-control border-start-0 modern-datepicker px-2" type="date" value="@todayDate.ToString("yyyy-MM-dd")" min="@todayDate.ToString("yyyy-MM-dd")" required />
                         </div>
                     </div>
 
                     <div class="col-6 col-md-2">
-                        <label asp-for="EstDepartureTime" class="form-label fw-semibold">Est. Departure</label>
+                        <label asp-for="EstDepartureTime" class="form-label fw-medium text-dark small">Est. Departure</label>
                         <input asp-for="EstDepartureTime" class="form-control" type="time" required />
                     </div>
 
                     <div class="col-6 col-md-2">
-                        <label asp-for="EstArrivalTime" class="form-label fw-semibold">Est. Arrival</label>
+                        <label asp-for="EstArrivalTime" class="form-label fw-medium text-dark small">Est. Arrival</label>
                         <input asp-for="EstArrivalTime" class="form-control" type="time" required />
                     </div>
                 </div>
@@ -52,54 +56,55 @@
         </div>
 
         <!-- 2. ROUTE & PASSENGERS -->
-        <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-header bg-white py-3 border-bottom">
-                <h5 class="card-title fw-bold text-primary mb-0">
+        <div class="card">
+            <div class="card-header bg-transparent py-3 border-bottom px-4">
+                <h6 class="fw-semibold text-primary mb-0 d-flex align-items-center">
                     <i class="bi bi-geo-alt me-2"></i>Trip Details & Passengers
-                </h5>
+                </h6>
             </div>
             <div class="card-body p-4">
-                <div class="row g-3">
+                <div class="row g-4">
                     <div class="col-12 col-md-6">
-                        <label asp-for="PickupLocation" class="form-label fw-semibold">Pickup Location</label>
+                        <label asp-for="PickupLocation" class="form-label fw-medium text-dark small">Pickup Location</label>
                         <input asp-for="PickupLocation" class="form-control" placeholder="Building, gate, or landmark" required />
                     </div>
 
                     <div class="col-12 col-md-6">
-                        <label asp-for="DropoffLocation" class="form-label fw-semibold">Destination / Drop-off</label>
+                        <label asp-for="DropoffLocation" class="form-label fw-medium text-dark small">Destination / Drop-off</label>
                         <input asp-for="DropoffLocation" class="form-control" placeholder="Destination address or landmark" required />
                     </div>
 
                     <div class="col-12">
-                        <label class="form-label fw-semibold d-flex justify-content-between">
+                        <label class="form-label fw-medium text-dark small d-flex justify-content-between align-items-end">
                             <span>Passenger Name(s)</span>
-                            <small class="text-muted fw-normal">Separate multiple names with commas</small>
+                            <span class="text-muted fw-normal" style="font-size: 0.75rem;">Separate multiple names with commas</span>
                         </label>
                         <!-- Field parsed into TripTicketPassengers in Controller -->
                         <textarea name="passengerNamesRaw" id="passengerNamesRaw" class="form-control" rows="2" placeholder="e.g. John Doe, Jane Smith" required></textarea>
                     </div>
 
                     <div class="col-12">
-                        <label asp-for="Purpose" class="form-label fw-semibold">Purpose / Remarks</label>
-                        <textarea asp-for="Purpose" class="form-control" rows="3" placeholder="Specify the purpose of this trip" required></textarea>
+                        <label asp-for="Purpose" class="form-label fw-medium text-dark small">Purpose / Remarks</label>
+                        <textarea asp-for="Purpose" class="form-control" rows="2" placeholder="Specify the purpose of this trip" required></textarea>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- ACTIONS -->
-        <div class="d-flex justify-content-between align-items-center pt-2 flex-wrap gap-2">
-            <small class="text-muted">Form Ref: <strong>CF-186 (Rev.01)</strong></small>
+        <div class="d-flex justify-content-between align-items-center mt-2 flex-wrap gap-3">
+            <div class="text-muted small">
+                Form Ref: <strong class="text-dark">CF-186 (Rev.01)</strong>
+            </div>
             <div class="d-flex gap-2">
-                <button type="reset" class="btn btn-outline-secondary px-4">Clear</button>
-                <button type="submit" class="btn btn-primary px-4 shadow-sm">
-                    <i class="bi bi-send me-1"></i> Submit Request
+                <button type="reset" class="btn btn-light border px-4 fw-medium text-dark">Clear</button>
+                <button type="submit" class="btn btn-primary px-4 fw-medium">
+                    <i class="bi bi-send me-2"></i>Submit Request
                 </button>
             </div>
         </div>
     </form>
 </div>
-
 
 @section Scripts {
     <script src="~/js/CreateRequest.js"></script>

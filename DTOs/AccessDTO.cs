@@ -12,12 +12,13 @@
         public bool Can_delete { get; set; }
         public bool Can_approve { get; set; }
         public bool Can_create { get; set; }
+        public bool SelectAll { get; set; }
     }
 
     public class AccessPayloadDTO
     {
         public int id { get; set; }
-        public string Action { get; set; } = null!;
+        public string action { get; set; } = null!;
         public bool isActive { get; set; }
     }
 

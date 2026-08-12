@@ -48,7 +48,8 @@ const ChangeStatus = (checkBox) => {
     let isNowActive = checkBox.is(":checked");
 
     let actionText = isNowActive ? "Enable" : "Disable";
-    let warningText = isNowActive ? "User with permission will grant permission to this action."
+    let warningText = isNowActive
+        ? "User with permission will grant permission to this action."
         : "This user cannot perform this action!";
 
     showConfirm(
@@ -58,6 +59,7 @@ const ChangeStatus = (checkBox) => {
         "Cancel",
         () => {
             showLoading(`${actionText} action...`);
+
             $.ajax({
                 url: "/Admin/UpdatePermissionAction",
                 type: "POST",
@@ -72,10 +74,71 @@ const ChangeStatus = (checkBox) => {
                     if (response.success) {
                         showAlertWithCallback("success", response.message, () => {
                             checkBox.prop('checked', isNowActive);
-                            $("#permissionTable").DataTable().ajax.reload();
+                            $("#permissionTable").DataTable().ajax.reload(null, false); // Keep paging position
                         });
                     } else {
+                        checkBox.prop("checked", !isNowActive);
                         showAlert("error", response.message || "An error occurred while switching status.");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    hideLoading();
+                    checkBox.prop("checked", !isNowActive);
+
+                    let errorMessage = "An unknown error occurred.";
+                    if (xhr.responseText) {
+                        try {
+                            let response = JSON.parse(xhr.responseText);
+                            errorMessage = response.error || response.message || errorMessage;
+                        } catch (e) {
+                            console.error("Could not parse error response");
+                        }
+                    }
+                    showAlert("error", errorMessage);
+                }
+            });
+        },
+        () => {
+            checkBox.prop("checked", !isNowActive);
+        }
+    );
+    checkBox.prop("checked", !isNowActive);
+};
+
+const LoadRoleSelection = () => {
+    createSelectOptions(
+        "#role_select",
+        {
+            url: "/Admin/GetRoles",
+            placeholder: "Role",
+            valueField: "RoleId",
+            textField: "RoleName"
+        }
+    )
+};
+
+const CreateNewPermission = (form) => {
+    showConfirm(
+        "Confirm Submission",
+        "Are you sure you want to create this permission?",
+        "Yes, Create",
+        "Cancel",
+        () => {
+            showLoading("Creating permission...");
+            $.ajax({
+                url: "/Admin/CreatePermission",
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(form),
+                success: function (response) {
+                    hideLoading();
+                    if (response.success) {
+                        showAlertWithCallback("success", response.message || "Permission created successfully!", () => {
+                            $("#permissionTable").DataTable().ajax.reload();
+                            $("#permissionForm")[0].reset();
+                        });
+                    } else {
+                        showAlert("error", response.message || "An error occurred while creating the permission.");
                     }
                 },
                 error: function (xhr, status, error) {
@@ -93,13 +156,11 @@ const ChangeStatus = (checkBox) => {
             });
         }
     );
-    checkBox.prop("checked", !isNowActive);
 }
 
-
-const LoadRoleSelection = () => {
+const LoadSelection = () => {
     createSelectOptions(
-        "#role_select",
+        "#roleSelect",
         {
             url: "/Admin/GetRoles",
             placeholder: "Role",
@@ -107,7 +168,17 @@ const LoadRoleSelection = () => {
             textField: "RoleName"
         }
     )
-};
+
+    createSelectOptions(
+        "#moduleSelect",
+        {
+            url: "/Admin/GetModulesSelection",
+            placeholder: "Module",
+            valueField: "ModuleId",
+            textField: "ModuleName"
+        }
+    )
+}
 
 $.fn.dataTable.ext.search.push(function (settings, data, dataIndex, rowData) {
     if (settings.nTable.id !== 'permissionTable') {
@@ -128,7 +199,7 @@ $.fn.dataTable.ext.search.push(function (settings, data, dataIndex, rowData) {
 
 $(function () {
     LoadRoleSelection();
-
+    
     const table = LoadPermissionTable();
     $('#role_select').on('change', function () {
         table.draw();
@@ -139,5 +210,25 @@ $(function () {
         console.log(checkBox.data("id"));
         console.log(checkBox.data("field"));
         ChangeStatus(checkBox);
+    });
+
+    $('#permissionModal').on('show.bs.modal', function () {
+        LoadSelection();
+
+        $('#permissionForm').on('submit', function (e) {
+            e.preventDefault();
+            const formdata = {
+                Role_id: $('#roleSelect').val(),
+                Module_id: $('#moduleSelect').val(),
+                Can_view: $('#canView').is(":checked"),
+                Can_edit: $('#canEdit').is(":checked"),
+                Can_delete: $('#canDelete').is(":checked"),
+                Can_approve: $('#canApprove').is(":checked"),
+                Can_create: $('#canCreate').is(":checked"),
+                SelectAll: $('#toggleAllPermissions').is(":checked")
+            };
+            CreateNewPermission(formdata);
+        });
+
     });
 });

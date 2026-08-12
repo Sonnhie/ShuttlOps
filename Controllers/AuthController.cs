@@ -56,5 +56,16 @@ namespace ShuttlOps.Controllers
                 redirectUrl = redirectUrl
             });
         }
+
+        public async Task<IActionResult> Logout()
+        {
+            var (isSuccess, message) = await authenticationService.Logout();
+            return new JsonResult(new
+            {
+                success = isSuccess,
+                message = message,
+                RedirectToAction = isSuccess ? "/Account/Login" : null
+            });
+        }
     }
 }

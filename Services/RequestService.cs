@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using ShuttlOps.DTOs;
 using ShuttlOps.Models;
 using System.Security.Claims;
@@ -43,7 +44,7 @@ namespace ShuttlOps.Services
                     TicketNumber = ticketNumber,
                     RequestorId = userinfo.UserName,
                     RequestorName = userinfo?.EmployeeName ?? "Unknown",
-                    ApprovalStatus = "Pending",
+                    ApprovalStatus = "Pending Section Head",
                     DateRequested = ticketDTO.RequestDate,
                     DateOfTrip = ticketDTO.TripDate,
                     RequestedDepartment = userinfo?.Department?.DepartmentName ?? "Unknown",
@@ -94,7 +95,7 @@ namespace ShuttlOps.Services
                     PickupLocation = t.PickupLocation,
                     DropLocation = t.DropoffLocation,
                     Purpose = t.Purpose,
-                    Remarks = null, // Assuming Remarks is not stored in TripTicket, adjust if needed
+                    Remarks = null, 
                     ApprovalStatus = t.ApprovalStatus,
                     Passengers = t.TripTicketPassengers.Select(p => new PassengerDTO
                     {
@@ -103,6 +104,61 @@ namespace ShuttlOps.Services
                 })
                 .ToListAsync();
             return requests;
+        }
+
+        public async Task<(bool isSuccess, string message)> SectionRequest(string status, int id)
+        {
+            try
+            {
+                var isreqExist = await dbContext.TripTickets.FindAsync(id);
+                var httpContext = httpContextAccessor.HttpContext;
+                var userIdClaim = httpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userIdClaim))
+                {
+                    return (false, "Requestor id is not valid.");
+                }
+                var userinfo = await dbContext.UserTables.Include(u => u.Department)
+                    .FirstOrDefaultAsync(u => u.Id == int.Parse(userIdClaim!));
+
+                if (isreqExist == null)
+                {
+                    return (false, "Trip ticket does not exist.");
+                }
+
+                isreqExist.ApproverId = int.Parse(userIdClaim!);
+                isreqExist.ApproverName = userinfo?.EmployeeName ?? "Unknown";
+                isreqExist.ApprovedAt = DateTime.UtcNow;
+                isreqExist.UpdatedAt = DateTime.UtcNow;
+                isreqExist.ApprovalStatus = status;
+                await dbContext.SaveChangesAsync();
+                return (true, "Trip ticket successfully updated.");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error updating request");
+                return (false, $"Error updating request: {ex.Message}");
+            }
+        }
+
+        public async Task<(bool isSuccess, string message)> DeleteRequestApproval(int id)
+        {
+            try
+            {
+                var isreqExist = await dbContext.TripTickets.FindAsync(id);
+                if (isreqExist == null)
+                {
+                   return (false, "Trip ticket does not exist.");
+                }
+
+                dbContext.TripTickets.Remove(isreqExist);
+                await dbContext.SaveChangesAsync();
+                return (true, "Trip ticket successfully deleted by the section head.");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error deleting request");
+                return (false, $"Error deleting request: {ex.Message}");
+            }
         }
     }
 }

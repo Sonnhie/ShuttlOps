@@ -19,5 +19,6 @@ namespace ShuttlOps.Services
         Task<(bool isSuccess, string message)> CreateModule(ModuleDTO moduleDTO);
         Task<List<AccessDTO>> GetPermissionList();
         Task<(bool isSuccess, string message)> UpdatePermission(AccessPayloadDTO payload);
+        Task<(bool isSuccess, string message)> CreatePermission(AccessDTO access);
     }
 }

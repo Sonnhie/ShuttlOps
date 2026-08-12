@@ -10,6 +10,12 @@
  * @param {object} options - Configuration options
  */
 
+/**
+ * Checks if the current authenticated user has a specific role.
+ * @param {string} roleName - The exact name of the role to check.
+ * @returns {boolean}
+ */
+
 const createDataTable = (tableId, options = {}) => {
     const searchPlaceholder = options.searchPlaceholder || "Search...";
     const defaultConfig = {
@@ -231,12 +237,19 @@ const TableColumnsConfig = {
         return {
             data: field,
             render: function (data) {
-                let badgeClass = 'bg-secondary';
-                if (data === 'Approved') badgeClass = 'bg-success';
-                else if (data === 'Pending') badgeClass = 'bg-warning';
-                else if (data === 'Hold') badgeClass = 'bg-info';
-                else if (data === 'Cancelled') badgeClass = 'bg-danger';
-                return `<span class="badge ${badgeClass}">${data}</span>`;
+                if (data === 'Pending Section') {
+                    return `<span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2 py-1">Pending Section</span>`;
+                }
+                else if (data === 'Pending GA Approve') {
+                    return `<span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2 py-1">Pending GA Approve</span>`;
+                }
+                else if (data === 'Approved') {
+                    return `<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">Ready for Dispatch</span>`;
+                }
+                else if (data === 'Rejected') {
+                    return `<span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1">Rejected</span>`;
+                }
+                return `<span class="badge bg-secondary px-2 py-1">${data}</span>`;
             }
         }
     },
@@ -360,6 +373,17 @@ const createSelectOptions = (selectId, options = {}) => {
 }
 
 const token = $('input[name="__RequestVerificationToken"]').val();
+
+const hasRole = (roleName) => {
+    const rolesAttr = document.body.dataset.userRoles || "";
+
+    // Split by comma and trim whitespace to create a clean array of roles
+    const userRoles = rolesAttr.split(',').map(role => role.trim());
+
+    return userRoles.includes(roleName);
+};
+
+
 
 document.addEventListener('DOMContentLoaded', function () {
     App.initModernDatepicker();

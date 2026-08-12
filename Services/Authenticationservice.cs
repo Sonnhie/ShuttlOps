@@ -60,5 +60,17 @@ namespace ShuttlOps.Services
                 return(false, $"SQL Error: {ex.Message}");
             }
         }
+
+        public async Task<(bool isSuccess, string message)> Logout()
+        {
+            var httpContext = httpContextAccessor.HttpContext;
+            if (httpContext == null)
+            {
+                return (false, "Context is null.");
+            }
+
+            await httpContext.SignOutAsync("Login");
+            return (true, "Logout successfully..redirecting...");
+        }
     }
 }

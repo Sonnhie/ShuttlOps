@@ -2,111 +2,167 @@
     ViewData["Title"] = "Today's Shuttle Dispatch Queue";
 }
 
-<!-- Custom Light Theme Styles -->
-<style>
+<div class="d-flex flex-column gap-4 mb-4">
 
-</style>
-
-<div class="container-fluid p-4">
-    <!-- Header with Live Clock & Controls -->
-    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+    <!-- HEADER: Title, Clock & KPI Pills -->
+    <div class="d-flex flex-wrap justify-content-between align-items-end pb-3 border-bottom gap-3">
         <div>
-            <h2 class="fw-bold mb-0 text-dark">
-                <i class="bi bi-bus-front-fill me-2 text-primary"></i> Shuttle Dispatch Board
-            </h2>
-            <p class="text-muted mb-0">Live Shuttle Departures & Schedules for Today</p>
+            <h1 class="h4 fw-bold text-dark mb-2 d-flex align-items-center">
+                <i class="bi bi-geo-alt-fill me-2 text-primary"></i> Live Dispatch Board
+            </h1>
+            <!-- Compact KPI Pills (Retained your IDs for backend binding) -->
+            <div class="d-flex gap-2">
+                <span class="badge bg-light text-dark border fw-medium px-2 py-1">
+                    <span class="text-muted me-1">Total:</span> <span id="statTotal">0</span>
+                </span>
+                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 fw-medium px-2 py-1">
+                    <span class="me-1">Active:</span> <span id="statActive">0</span>
+                </span>
+                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 fw-medium px-2 py-1">
+                    <span class="me-1">Pending:</span> <span id="statPending">0</span>
+                </span>
+                <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 fw-medium px-2 py-1">
+                    <span class="me-1">Completed:</span> <span id="statCompleted">0</span>
+                </span>
+            </div>
         </div>
         <div class="text-end">
-            <h3 id="liveClock" class="time-display text-primary mb-0">00:00:00 AM</h3>
-            <span id="currentDate" class="text-muted fw-semibold">Loading date...</span>
+            <h3 id="liveClock" class="fw-bold text-primary mb-0 fs-3" style="font-variant-numeric: tabular-nums;">00:00:00 AM</h3>
+            <span id="currentDate" class="text-muted small fw-medium">Loading date...</span>
         </div>
     </div>
 
-    <!-- KPI Summary Cards -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <div class="queue-card p-3 d-flex align-items-center">
-                <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3 text-primary fs-3">
-                    <i class="bi bi-calendar-event"></i>
-                </div>
-                <div>
-                    <span class="text-muted fs-7 text-uppercase fw-semibold">Total Scheduled</span>
-                    <h3 id="statTotal" class="fw-bold mb-0 text-dark">0</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="queue-card p-3 d-flex align-items-center">
-                <div class="rounded-circle bg-success bg-opacity-10 p-3 me-3 text-success fs-3">
-                    <i class="bi bi-play-circle-fill"></i>
-                </div>
-                <div>
-                    <span class="text-muted fs-7 text-uppercase fw-semibold">On the Road</span>
-                    <h3 id="statActive" class="fw-bold mb-0 text-dark">0</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="queue-card p-3 d-flex align-items-center">
-                <div class="rounded-circle bg-warning bg-opacity-10 p-3 me-3 text-warning fs-3">
-                    <i class="bi bi-clock-history"></i>
-                </div>
-                <div>
-                    <span class="text-muted fs-7 text-uppercase fw-semibold">Upcoming Trips</span>
-                    <h3 id="statPending" class="fw-bold mb-0 text-dark">0</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="queue-card p-3 d-flex align-items-center">
-                <div class="rounded-circle bg-secondary bg-opacity-10 p-3 me-3 text-secondary fs-3">
-                    <i class="bi bi-check-circle-fill"></i>
-                </div>
-                <div>
-                    <span class="text-muted fs-7 text-uppercase fw-semibold">Completed</span>
-                    <h3 id="statCompleted" class="fw-bold mb-0 text-dark">0</h3>
+    <!-- NOW SECTION: Immediate Action (Highest Priority) -->
+    <div>
+        <h5 class="fw-bold text-dark mb-3 d-flex align-items-center">
+            <span class="bg-danger rounded-circle me-2 pulse-boarding" style="width: 10px; height: 10px;"></span>
+            NOW BOARDING / DEPARTING
+        </h5>
+
+        <!-- Target this container in your JS to inject the most immediate trip -->
+        <div id="now-trip-container">
+            <!-- MOCKUP OF THE "NOW" CARD -->
+            <div class="card border-0 shadow-sm border-start border-primary border-5 overflow-hidden">
+                <div class="card-body p-4 p-md-5">
+                    <div class="row align-items-center">
+                        <div class="col-md-7 col-lg-8 border-end border-light">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="badge bg-primary px-3 py-2 text-uppercase tracking-wider fw-bold">TK-8892</span>
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2">BOARDING</span>
+                            </div>
+                            <h2 class="display-6 fw-bold text-dark mb-1">BGC Makati City</h2>
+                            <p class="text-muted fs-5 mb-0"><i class="bi bi-geo me-1"></i> From: Nidec Instruments Philippines</p>
+
+                            <div class="d-flex gap-4 mt-4 pt-2">
+                                <div>
+                                    <span class="text-muted small d-block text-uppercase fw-semibold">Driver</span>
+                                    <span class="text-dark fw-bold fs-6"><i class="bi bi-person-badge me-1"></i> Roberto M.</span>
+                                </div>
+                                <div>
+                                    <span class="text-muted small d-block text-uppercase fw-semibold">Vehicle</span>
+                                    <span class="text-dark fw-bold fs-6"><i class="bi bi-car-front me-1"></i> Ford Transit (ABC-1234)</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-5 col-lg-4 text-center mt-4 mt-md-0">
+                            <div class="text-muted small text-uppercase fw-bold tracking-wider mb-2">Est. Departure In</div>
+                            <!-- Countdown timer targeted via JS -->
+                            <div class="display-4 fw-bolder text-primary mb-2" style="font-variant-numeric: tabular-nums;">04:22</div>
+                            <div class="text-muted fw-medium">Scheduled: 14:45</div>
+                        </div>
+                    </div>
                 </div>
             </div>
+            <!-- END MOCKUP -->
         </div>
     </div>
 
-    <!-- Search & Filter Controls -->
-    <div class="row mb-3 align-items-center">
-        <div class="col-md-4">
-            <div class="input-group">
-                <span class="input-group-text bg-white border-end-0 text-muted">
-                    <i class="bi bi-search"></i>
-                </span>
-                <input type="text" id="queueSearch" class="form-control border-start-0 shadow-none ps-0" placeholder="Search vehicle, driver, destination...">
+    <!-- NEXT SECTION: Upcoming in the next hour -->
+    <div class="mt-2">
+        <h6 class="fw-bold text-muted text-uppercase tracking-wider mb-3 fs-7">
+            <i class="bi bi-arrow-right-circle me-2"></i>Next Up (Within 60 Mins)
+        </h6>
+
+        <!-- Target this container in your JS to loop and inject the next 2-3 trips -->
+        <div class="row g-3" id="next-trips-container">
+
+            <!-- MOCKUP CARD 1 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-light shadow-sm">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="badge bg-light text-dark border">TK-8893</span>
+                            <span class="fw-bold text-primary">15:15</span>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-1 text-truncate">South Plant Facility</h5>
+                        <p class="text-muted small mb-3 text-truncate">Driver: J. Dela Cruz | Toyota Hiace</p>
+                        <div class="d-flex align-items-center text-warning small fw-semibold">
+                            <i class="bi bi-clock-history me-1"></i> Departs in ~35 mins
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="col-md-8 text-end">
-            <button id="btnRefresh" class="btn btn-outline-primary btn-sm px-3 me-2">
-                <i class="bi bi-arrow-clockwise me-1"></i> Refresh Board
-            </button>
-            <span class="text-muted fs-7 ms-2">Auto-refreshes every 30s</span>
+
+            <!-- MOCKUP CARD 2 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-light shadow-sm">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="badge bg-light text-dark border">TK-8894</span>
+                            <span class="fw-bold text-primary">15:30</span>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-1 text-truncate">Metro Commuter Drop-off</h5>
+                        <p class="text-muted small mb-3 text-truncate">Driver: L. Santos | Nissan Urvan</p>
+                        <div class="d-flex align-items-center text-warning small fw-semibold">
+                            <i class="bi bi-clock-history me-1"></i> Departs in ~50 mins
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <!-- Main Light Queuing Table -->
-    <div class="queue-card p-3">
-        <div class="table-responsive">
-            <table id="ShuttleQueueTable" class="table table-hover align-middle mb-0">
-                <thead class="table-light text-muted fs-7 text-uppercase">
-                    <tr>
-                        <th>Time</th>
-                        <th>Ticket No.</th>
-                        <th>Vehicle & Plate</th>
-                        <th>Driver</th>
-                        <th>Destination</th>
-                        <th>Passengers</th>
-                        <th class="text-center">Status</th>
-                    </tr>
-                </thead>
-                <tbody id="queueTableBody" class="fs-6">
-                    <!-- Dynamic Rows Render Here -->
-                </tbody>
-            </table>
+    <!-- LATER SECTION: The traditional DataTables list for the rest of the day -->
+    <div class="mt-4">
+        <div class="d-flex justify-content-between align-items-end mb-3">
+            <h6 class="fw-bold text-muted text-uppercase tracking-wider mb-0 fs-7">
+                <i class="bi bi-list-task me-2"></i>Later Today & Completed
+            </h6>
+
+            <!-- Controls strictly retained for DataTables & JS -->
+            <div class="d-flex gap-2 align-items-center">
+                <div class="input-group input-group-sm" style="width: 250px;">
+                    <span class="input-group-text bg-white text-muted border-end-0">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" id="queueSearch" class="form-control border-start-0 px-2" placeholder="Search trips...">
+                </div>
+                <button id="btnRefresh" class="btn btn-outline-primary btn-sm px-3 fw-medium d-flex align-items-center">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="card p-0 overflow-hidden shadow-sm">
+            <div class="table-responsive">
+                <table id="ShuttleQueueTable" class="table table-hover align-middle mb-0 w-100">
+                    <thead class="bg-light text-muted text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.05em;">
+                        <tr>
+                            <th class="px-4 py-3 border-bottom-0">Time</th>
+                            <th class="py-3 border-bottom-0">Ticket No.</th>
+                            <th class="py-3 border-bottom-0">Vehicle & Plate</th>
+                            <th class="py-3 border-bottom-0">Driver</th>
+                            <th class="py-3 border-bottom-0">Destination</th>
+                            <th class="py-3 border-bottom-0">Passengers</th>
+                            <th class="text-center py-3 border-bottom-0 px-4">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="queueTableBody" class="text-dark small border-top">
+                        <!-- Standard DataTables rows append here -->
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

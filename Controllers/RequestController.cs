@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ShuttlOps.DTOs;
 using ShuttlOps.Services;
@@ -46,6 +47,73 @@ namespace ShuttlOps.Controllers
                 success = true,
                 data = requests
             });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SectionRequestApproval(string status, int id)
+        {
+            var (isSuccess, message) = await requestService.SectionRequest(status, id);
+            if (isSuccess)
+            {
+                return new JsonResult(new
+                {
+                    success = true,
+                    message = message
+                });
+            }
+            else
+            {
+                return new JsonResult(new
+                {
+                    success = false,
+                    message = message
+                });
+            }
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteRequestApproval(int id)
+        {
+            var (isSuccess, message) = await requestService.DeleteRequestApproval(id);
+            if (isSuccess)
+            {
+                return new JsonResult(new
+                {
+                    success = true,
+                    message = message
+                });
+            }
+            else
+            {
+                return new JsonResult(new
+                {
+                    success = false,
+                    message = message
+                });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RequestDelete(string status, int id)
+        {
+            var (isSuccess, message) = await requestService.SectionRequest(status, id);
+            if (isSuccess)
+            {
+                return new JsonResult(new
+                {
+                    success = true,
+                    message = message
+                });
+            }
+            else
+            {
+                return new JsonResult(new
+                {
+                    success = false,
+                    message = message
+                });
+            }
         }
     }
 }

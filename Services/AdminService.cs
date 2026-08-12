@@ -115,7 +115,7 @@ namespace ShuttlOps.Services
                     EmployeeName = userDto.EmployeeName,
                     CreatedAt = DateTime.Now,
                 };
-                
+
                 dbContext.UserTables.Add(newUser);
                 await dbContext.SaveChangesAsync();
                 return (true, "User created successfully");
@@ -342,45 +342,92 @@ namespace ShuttlOps.Services
 
         public async Task<(bool isSuccess, string message)> UpdatePermission(AccessPayloadDTO payload)
         {
-            if (string.IsNullOrWhiteSpace(payload?.Action))
+            if (string.IsNullOrWhiteSpace(payload?.action))
             {
                 return (false, "Action parameter is required.");
             }
 
             try
             {
-                var permission = await dbContext.PermissionsTables.FirstOrDefaultAsync(p => p.PermissionId == payload.id);
+                var permission = await dbContext.PermissionsTables.FindAsync(payload.id);
                 if (permission == null)
                 {
                     return (false, $"Module with ID {payload.id} was not found.");
                 }
-                string cleanAction = payload.Action.Trim().ToLower();
 
-                if (cleanAction == "can_view")
+                string cleanAction = payload.action.Trim();
+
+                if (cleanAction == "Can_view")
                 {
                     permission.CanView = payload.isActive;
                 }
-                else if(cleanAction == "can_create")
+                else if(cleanAction == "Can_create")
                 {
                     permission.CanCreate = payload.isActive;
                 }
-                else if(cleanAction == "can_delete")
+                else if(cleanAction == "Can_delete")
                 {
-                    permission.CanEdit = payload.isActive;
+                    permission.CanDelete = payload.isActive;
                 }
-                else if(cleanAction == "can_approve")
+                else if(cleanAction == "Can_approve")
                 {
                     permission.CanApprove = payload.isActive;
                 }
-                else if(cleanAction == "can_edit")
+                else if(cleanAction == "Can_edit")
                 {
                     permission.CanEdit = payload.isActive;
                 }
+
                 await dbContext.SaveChangesAsync();
                 string statusWord = payload.isActive ? "enable action" : "disable action";
-                return (true, $"Successfully {statusWord} {payload.Action}");
+                return (true, $"Successfully {statusWord}");
             }
             catch (Exception ex)
+            {
+                logger.LogError(ex, "An error occurred while updating a permission.");
+                return (false, $"Error creating module: {ex.Message}");
+            }
+        }
+
+        public async Task<(bool isSuccess, string message)> CreatePermission(AccessDTO access)
+        {
+            try
+            {
+                var permissionExist = await dbContext.PermissionsTables.Where(p => p.RoleId == access.Role_id && p.ModuleId == access.Module_id).FirstOrDefaultAsync();
+                if(permissionExist != null)
+                {
+                    return (false, $"This permission is already exist.");
+                }
+
+                var newPermission = new PermissionsTable();
+
+
+                if (access.SelectAll)
+                {
+                    newPermission.RoleId = access.Role_id;
+                    newPermission.ModuleId = access.Module_id;
+                    newPermission.CanApprove = true;
+                    newPermission.CanCreate = true;
+                    newPermission.CanDelete = true;
+                    newPermission.CanEdit = true;
+                    newPermission.CanView = true;
+                }
+                else
+                {
+                    newPermission.RoleId = access.Role_id;
+                    newPermission.ModuleId = access.Module_id;
+                    newPermission.CanApprove = access.Can_approve;
+                    newPermission.CanCreate = access.Can_create;
+                    newPermission.CanDelete = access.Can_delete;
+                    newPermission.CanEdit = access.Can_edit;
+                    newPermission.CanView = access.Can_view;
+                }
+
+                dbContext.PermissionsTables.Add(newPermission);
+                await dbContext.SaveChangesAsync();
+                return (true, "Permission successfully created.");
+            }
+            catch(Exception ex)
             {
                 logger.LogError(ex, "An error occurred while updating a permission.");
                 return (false, $"Error creating module: {ex.Message}");

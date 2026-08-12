@@ -289,5 +289,27 @@ namespace ShuttlOps.Controllers
                 });
             }
         }
+
+        [HttpPost]
+        public async Task<IActionResult> CreatePermission([FromBody] AccessDTO payload)
+        {
+            var (isSuccess, message) = await adminservice.CreatePermission(payload);
+            if (isSuccess)
+            {
+                return new JsonResult(new
+                {
+                    success = true,
+                    message = message
+                });
+            }
+            else
+            {
+                return new JsonResult(new
+                {
+                    success = false,
+                    message = message
+                });
+            }
+        }
     }
 }

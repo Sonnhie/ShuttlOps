@@ -1,5 +1,141 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
+﻿<!-- Role & Module Selection Section -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6">
+        <label for="roleSelect" class="form-label fw-semibold text-secondary small text-uppercase">
+            <i class="bi bi-shield-lock me-1"></i> Role
+        </label>
+        <select class="form-select shadow-sm border-secondary-subtle" id="roleSelect" name="role_id" required>
+            <option value="" selected disabled>-- Select Role --</option>
+        </select>
+    </div>
+    <div class="col-sm-6">
+        <label for="moduleSelect" class="form-label fw-semibold text-secondary small text-uppercase">
+            <i class="bi bi-grid-3x3-gap me-1"></i> Module
+        </label>
+        <select class="form-select shadow-sm border-secondary-subtle" id="moduleSelect" name="module_id" required>
+            <option value="" selected disabled>-- Select Module --</option>
+        </select>
+    </div>
+</div>
+
+<hr class="text-muted opacity-25 my-4">
+
+<!-- Matrix Header with Action Bar -->
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+        <h6 class="fw-bold text-dark mb-0">Permissions Matrix</h6>
+        <small class="text-muted">Configure granular access rights for the selected role and module</small>
+    </div>
+
+    <!-- Quick Select All Switch -->
+    <div class="form-check form-switch bg-body-tertiary px-3 py-1 rounded-pill border">
+        <input class="form-check-input ms-0 me-2" type="checkbox" role="switch" id="toggleAllPermissions" style="cursor: pointer;">
+        <label class="form-check-label small fw-semibold text-secondary" for="toggleAllPermissions" style="cursor: pointer;">
+            Select All
+        </label>
+    </div>
+</div>
+
+<!-- Permissions Container -->
+<div class="card shadow-sm border-0 rounded-3">
+    <div class="card-body p-3 bg-light rounded-3 border">
+        <div class="row g-3">
+
+            <!-- Can View -->
+            <div class="col-sm-6">
+                <div class="permission-card bg-white p-3 rounded-3 border h-100 d-flex flex-column justify-content-between">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="p-2 rounded-2 bg-primary bg-opacity-10 text-primary">
+                                <i class="bi bi-eye"></i>
+                            </span>
+                            <label class="fw-semibold text-dark mb-0" for="canView" style="cursor: pointer;">Can View</label>
+                        </div>
+                        <div class="form-check form-switch m-0">
+                            <input class="form-check-input permission-switch" type="checkbox" role="switch" id="canView" name="can_view" data-field="can_view" style="cursor: pointer;">
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-0 mt-2">Allows viewing and listing records in this module.</p>
+                </div>
+            </div>
+
+            <!-- Can Create -->
+            <div class="col-sm-6">
+                <div class="permission-card bg-white p-3 rounded-3 border h-100 d-flex flex-column justify-content-between">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="p-2 rounded-2 bg-success bg-opacity-10 text-success">
+                                <i class="bi bi-plus-lg"></i>
+                            </span>
+                            <label class="fw-semibold text-dark mb-0" for="canCreate" style="cursor: pointer;">Can Create</label>
+                        </div>
+                        <div class="form-check form-switch m-0">
+                            <input class="form-check-input permission-switch" type="checkbox" role="switch" id="canCreate" name="can_create" data-field="can_create" style="cursor: pointer;">
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-0 mt-2">Allows creating and saving new entries.</p>
+                </div>
+            </div>
+
+            <!-- Can Edit -->
+            <div class="col-sm-6">
+                <div class="permission-card bg-white p-3 rounded-3 border h-100 d-flex flex-column justify-content-between">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="p-2 rounded-2 bg-warning bg-opacity-10 text-warning">
+                                <i class="bi bi-pencil"></i>
+                            </span>
+                            <label class="fw-semibold text-dark mb-0" for="canEdit" style="cursor: pointer;">Can Edit</label>
+                        </div>
+                        <div class="form-check form-switch m-0">
+                            <input class="form-check-input permission-switch" type="checkbox" role="switch" id="canEdit" name="can_edit" data-field="can_edit" style="cursor: pointer;">
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-0 mt-2">Allows modifying existing records.</p>
+                </div>
+            </div>
+
+            <!-- Can Delete -->
+            <div class="col-sm-6">
+                <div class="permission-card bg-white p-3 rounded-3 border h-100 d-flex flex-column justify-content-between">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="p-2 rounded-2 bg-danger bg-opacity-10 text-danger">
+                                <i class="bi bi-trash"></i>
+                            </span>
+                            <label class="fw-semibold text-dark mb-0" for="canDelete" style="cursor: pointer;">Can Delete</label>
+                        </div>
+                        <div class="form-check form-switch m-0">
+                            <input class="form-check-input permission-switch" type="checkbox" role="switch" id="canDelete" name="can_delete" data-field="can_delete" style="cursor: pointer;">
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-0 mt-2">Allows deleting or archiving records.</p>
+                </div>
+            </div>
+
+            <!-- Elevated Action: Can Approve -->
+            <div class="col-12 mt-3">
+                <div class="permission-card bg-white p-3 rounded-3 border border-primary border-opacity-25 h-100 d-flex flex-column justify-content-between">
+                    <div class="d-flex align-items-center justify-content-between gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="p-2 rounded-2 bg-primary text-white">
+                                <i class="bi bi-shield-check"></i>
+                            </span>
+                            <div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <label class="fw-bold text-primary mb-0" for="canApprove" style="cursor: pointer;">Can Approve</label>
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Elevated Privilege</span>
+                                </div>
+                                <div class="text-muted small mt-1">Grants authority to review and approve workflow requests.</div>
+                            </div>
+                        </div>
+                        <div class="form-check form-switch m-0">
+                            <input class="form-check-input permission-switch" type="checkbox" role="switch" id="canApprove" name="can_approve" data-field="can_approve" style="cursor: pointer; transform: scale(1.15);">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

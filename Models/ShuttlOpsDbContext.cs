@@ -120,27 +120,25 @@ public partial class ShuttlOpsDbContext : DbContext
 
         modelBuilder.Entity<PermissionsTable>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("Permissions_Table");
+            entity.HasKey(e => e.PermissionId);
 
+            entity.ToTable("Permissions_Table");
+
+            entity.Property(e => e.PermissionId).HasColumnName("permission_id");
             entity.Property(e => e.CanApprove).HasColumnName("can_approve");
             entity.Property(e => e.CanCreate).HasColumnName("can_create");
             entity.Property(e => e.CanDelete).HasColumnName("can_delete");
             entity.Property(e => e.CanEdit).HasColumnName("can_edit");
             entity.Property(e => e.CanView).HasColumnName("can_view");
             entity.Property(e => e.ModuleId).HasColumnName("module_id");
-            entity.Property(e => e.PermissionId)
-                .ValueGeneratedOnAdd()
-                .HasColumnName("permission_id");
             entity.Property(e => e.RoleId).HasColumnName("role_id");
 
-            entity.HasOne(d => d.Module).WithMany()
+            entity.HasOne(d => d.Module).WithMany(p => p.PermissionsTables)
                 .HasForeignKey(d => d.ModuleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Permissions_Module");
 
-            entity.HasOne(d => d.Role).WithMany()
+            entity.HasOne(d => d.Role).WithMany(p => p.PermissionsTables)
                 .HasForeignKey(d => d.RoleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Permissions_Role");

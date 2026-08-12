@@ -1,124 +1,177 @@
-﻿
-@model HashSet<string>
+﻿@model HashSet<string>
 
-<nav class="sidebar-nav px-3 mt-3 fw-medium" aria-label="Sidebar Navigation">
+<nav class="sidebar-nav px-3 mt-4" aria-label="Sidebar Navigation">
     @{
         bool showRequestorMngmt = Model.Contains("Request Management");
+        bool showAdminMenu = Model.Contains("Admin Dashboard");
+        bool showRequestorMenu = Model.Contains("Requestor Dashboard");
+        bool showGAMenu = Model.Contains("GA Dashboard");
+
 
         var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
         var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
-        var isUserArea = currentController == "User";
+
         var isAdminArea = currentController == "Admin";
-        var isRequestManagementActive = isUserArea &&
-        (currentAction == "CreateTicketPage" || currentAction == "TripSchedule" || currentAction == "ShuttleViewer");
-        var isUserManagementActive = isAdminArea &&
-        (currentAction == "Users" || currentAction == "Groups" || currentAction == "Modules" || currentAction == "Access");
+        var isGAArea = currentController == "GA";
+        var isRequestorArea = currentController == "Request";
+
+        var isAdminAreaActive = isAdminArea && isRequestorArea && (currentAction == "CreateTicketPage" || currentAction == "TripSchedule" || currentAction == "ShuttleViewer" ||
+        currentAction == "Users" || currentAction == "Groups" || currentAction == "Modules" || currentAction == "Access");
+
+        var isRequestorAreaActive = isRequestorArea && (currentAction == "CreateTicketPage" || currentAction == "TripSchedule" || currentAction == "ShuttleViewer");
+
     }
 
-    @if (showRequestorMngmt)
+    @if (showAdminMenu)
     {
-        <div class="nav-section-label text-uppercase text-muted px-3 mb-2 small fw-semibold tracking-wider">
+        <div class="text-uppercase text-muted px-3 mb-2" style="font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em;">
             Main Menu
         </div>
 
-        @if(Model.Contains("Admin Dashboard"))
-        {
-            <a asp-controller="Admin" asp-action="Index"
-               class="nav-link-custom d-flex align-items-center px-3 py-2.5 rounded-3 mb-1 @(isAdminArea && currentAction == "Index" ? "active" : "")">
-                <i class="bi bi-house-door me-3 fs-5"></i>
-                <span>Dashboard</span>
+        <a asp-controller="Admin" asp-action="Index"
+           class="nav-link-custom d-flex align-items-center px-3 py-2 mb-1 @(isAdminArea && currentAction == "Index" ? "active" : "")">
+            <i class="bi bi-house-door me-3 fs-6"></i>
+            <span>Dashboard</span>
+        </a>
+
+
+
+        <div class="text-uppercase text-muted px-3 mb-2 mt-4" style="font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em;">
+            Admin Menu
+        </div>
+        <div class="nav-item-group mb-1">
+            <a href="#adminSubmenu"
+               data-bs-toggle="collapse"
+               aria-expanded="@(isAdminAreaActive.ToString().ToLowerInvariant())"
+               class="nav-link-custom d-flex justify-content-between align-items-center px-3 py-2 @(isAdminAreaActive ? "" : "collapsed") @(isAdminAreaActive ? "active-parent" : "")">
+                <span class="d-flex align-items-center">
+                    <i class="bi bi-person-fill-gear me-3 fs-6"></i>
+                    <span>Account and Access</span>
+                </span>
+                <i class="bi bi-chevron-right submenu-arrow small"></i>
             </a>
-        }
 
-        @if (Model.Contains("Requestor Dashboard"))
-        {
-            <a asp-controller="User" asp-action="Index"
-               class="nav-link-custom d-flex align-items-center px-3 py-2.5 rounded-3 mb-1 @(isUserArea && currentAction == "Index" ? "active" : "")">
-                <i class="bi bi-grid-1x2 me-3 fs-5"></i>
-                <span>Dashboard</span>
-            </a>
-        }
+            <div class="collapse @(isAdminAreaActive ? "show" : "") py-1" id="adminSubmenu">
+                <div class="d-flex flex-column gap-1">
+                    <a asp-controller="Admin" asp-action="Users"
+                       class="nav-link-sub d-flex align-items-center py-1.5 @(isAdminArea && currentAction == "Users" ? "active" : "")">
+                        <span>Users</span>
+                    </a>
 
-        @if (Model.Contains("Request Management"))
-        {
-            <div class="nav-item-group mb-1">
-                <a href="#requestSubmenu"
-                   data-bs-toggle="collapse"
-                   aria-expanded="@(isRequestManagementActive.ToString().ToLowerInvariant())"
-                   class="nav-link-custom d-flex justify-content-between align-items-center px-3 py-2.5 rounded-3 @(isRequestManagementActive ? "" : "collapsed") @(isRequestManagementActive ? "active-parent" : "")">
-                    <span class="d-flex align-items-center">
-                        <i class="bi bi-send me-3 fs-5"></i>
-                        <span>Request Management</span>
-                    </span>
-                    <i class="bi bi-chevron-right submenu-arrow small"></i>
-                </a>
+                    <a asp-controller="Admin" asp-action="Groups"
+                       class="nav-link-sub d-flex align-items-center py-1.5 @(isAdminArea && currentAction == "Groups" ? "active" : "")">
+                        <span>Group and Cluster</span>
+                    </a>
 
-                <div class="collapse @(isRequestManagementActive ? "show" : "") mt-1 ps-3" id="requestSubmenu">
-                    <div class="d-flex flex-column gap-1 border-start border-2 ps-2 my-1">
-                        <a asp-controller="User" asp-action="CreateTicketPage"
-                           class="nav-link-sub d-flex align-items-center px-3 py-2 rounded-2 @(isUserArea && currentAction == "CreateTicketPage" ? "active" : "")">
-                            <i class="bi bi-ticket-perforated me-2"></i>
-                            <span>Create Trip Ticket</span>
-                        </a>
+                    <a asp-controller="Admin" asp-action="Modules"
+                       class="nav-link-sub d-flex align-items-center py-1.5 @(isAdminArea && currentAction == "Modules" ? "active" : "")">
+                        <span>Modules</span>
+                    </a>
 
-                        <a asp-controller="User" asp-action="TripSchedule"
-                           class="nav-link-sub d-flex align-items-center px-3 py-2 rounded-2 @(isUserArea && currentAction == "TripSchedule" ? "active" : "")">
-                            <i class="bi bi-calendar-check me-2"></i>
-                            <span>Trip Schedule</span>
-                        </a>
-
-                        <a asp-controller="User" asp-action="ShuttleViewer"
-                           class="nav-link-sub d-flex align-items-center px-3 py-2 rounded-2 @(isUserArea && currentAction == "ShuttleViewer" ? "active" : "")">
-                            <i class="bi bi-bus-front me-2"></i>
-                            <span>Shuttle Viewer</span>
-                        </a>
-                    </div>
+                    <a asp-controller="Admin" asp-action="Access"
+                       class="nav-link-sub d-flex align-items-center py-1.5 @(isAdminArea && currentAction == "Access" ? "active" : "")">
+                        <span>Access and Permission</span>
+                    </a>
                 </div>
             </div>
-        }
+        </div>
+        <a asp-controller="User" asp-action="ShuttleViewer"
+           class="nav-link-custom d-flex align-items-center px-3 py-2 mb-1 @(currentAction == "ShuttleViewer" ? "active" : "")">
+            <i class="bi  bi-bus-front-fill me-3 fs-6"></i>
+            <span>Shuttle Viewer</span>
+        </a>
+    }
 
-        @if (Model.Contains("System Settings"))
-        {
-            <div class="nav-item-group mb-1">
-                <a href="#adminSubmenu"
-                   data-bs-toggle="collapse"
-                   aria-expanded="@(isUserManagementActive.ToString().ToLowerInvariant())"
-                   class="nav-link-custom d-flex justify-content-between align-items-center px-3 py-2.5 rounded-3 @(isUserManagementActive ? "" : "collapsed") @(isUserManagementActive ? "active-parent" : "")">
-                    <span class="d-flex align-items-center">
-                        <i class="bi bi-person-fill-gear me-3 fs-5"></i>
-                        <span>User Management</span>
-                    </span>
-                    <i class="bi bi-chevron-right submenu-arrow small"></i>
-                </a>
 
-                <div class="collapse @(isUserManagementActive ? "show" : "") mt-1 ps-3" id="adminSubmenu">
-                    <div class="d-flex flex-column gap-1 border-start border-2 ps-2 my-1">
-                        <a asp-controller="Admin" asp-action="Users"
-                           class="nav-link-sub d-flex align-items-center px-3 py-2 rounded-2 @(isAdminArea && currentAction == "Users" ? "active" : "")">
-                            <i class="bi bi-people me-2"></i>
-                            <span>Users</span>
-                        </a>
+    @if (showRequestorMenu)
+    {
+        <div class="text-uppercase text-muted px-3 mb-2" style="font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em;">
+            Main Menu
+        </div>
 
-                        <a asp-controller="Admin" asp-action="Groups"
-                           class="nav-link-sub d-flex align-items-center px-3 py-2 rounded-2 @(isAdminArea && currentAction == "Groups" ? "active" : "")">
-                            <i class="bi bi-people-fill me-2"></i>
-                            <span>Group and Cluster</span>
-                        </a>
+        <a asp-controller="User" asp-action="Index"
+           class="nav-link-custom d-flex align-items-center px-3 py-2 mb-1 @(isRequestorAreaActive && currentAction == "Index" ? "active" : "")">
+            <i class="bi bi-grid-1x2 me-3 fs-6"></i>
+            <span>Dashboard</span>
+        </a>
 
-                        <a asp-controller="Admin" asp-action="Modules"
-                           class="nav-link-sub d-flex align-items-center px-3 py-2 rounded-2 @(isAdminArea && currentAction == "Modules" ? "active" : "")">
-                            <i class="bi bi-grid-1x2 me-2"></i>
-                            <span>Modules</span>
-                        </a>
+        <div class="nav-item-group mb-1">
+            <a href="#requestSubmenu"
+               data-bs-toggle="collapse"
+               aria-expanded="@(isRequestorAreaActive.ToString().ToLowerInvariant())"
+               class="nav-link-custom d-flex justify-content-between align-items-center px-3 py-2 @(isRequestorAreaActive ? "" : "collapsed") @(isRequestorAreaActive ? "active-parent" : "")">
+                <span class="d-flex align-items-center">
+                    <i class="bi bi-send me-3 fs-6"></i>
+                    <span>Trip Ticket Request</span>
+                </span>
+                <i class="bi bi-chevron-right submenu-arrow small"></i>
+            </a>
 
-                        <a asp-controller="Admin" asp-action="Access"
-                           class="nav-link-sub d-flex align-items-center px-3 py-2 rounded-2 @(isAdminArea && currentAction == "Access" ? "active" : "")">
-                            <i class="bi bi-key-fill me-2"></i>
-                            <span>Access and Permission</span>
-                        </a>
-                    </div>
+            <div class="collapse @(isRequestorAreaActive ? "show" : "") py-1" id="requestSubmenu">
+                <div class="d-flex flex-column gap-1">
+                    <a asp-controller="User" asp-action="CreateTicketPage"
+                       class="nav-link-sub d-flex align-items-center py-1.5 @(currentAction == "CreateTicketPage" ? "active" : "")">
+                        <span>Create Trip Ticket</span>
+                    </a>
+
+                    <a asp-controller="User" asp-action="TripSchedule"
+                       class="nav-link-sub d-flex align-items-center py-1.5 @(currentAction == "TripSchedule" ? "active" : "")">
+                        <span>Trip Schedule</span>
+                    </a>
                 </div>
             </div>
-        }
+        </div>
+
+        <a asp-controller="User" asp-action="ShuttleViewer"
+           class="nav-link-custom d-flex align-items-center px-3 py-2 mb-1 @(currentAction == "ShuttleViewer" ? "active" : "")">
+            <i class="bi  bi-bus-front-fill me-3 fs-6"></i>
+            <span>Shuttle Viewer</span>
+        </a>
+    }
+
+    @if (showGAMenu)
+    {
+        <div class="text-uppercase text-muted px-3 mb-2" style="font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em;">
+            Main Menu
+        </div>
+
+        <a asp-controller="GA" asp-action="Index"
+           class="nav-link-custom d-flex align-items-center px-3 py-2 mb-1 @(isRequestorAreaActive && currentAction == "Index" ? "active" : "")">
+            <i class="bi bi-grid-1x2 me-3 fs-6"></i>
+            <span>Dashboard</span>
+        </a>
+
+        <div class="nav-item-group mb-1">
+            <a href="#requestSubmenu"
+               data-bs-toggle="collapse"
+               aria-expanded="@(isRequestorAreaActive.ToString().ToLowerInvariant())"
+               class="nav-link-custom d-flex justify-content-between align-items-center px-3 py-2 @(isRequestorAreaActive ? "" : "collapsed") @(isRequestorAreaActive ? "active-parent" : "")">
+                <span class="d-flex align-items-center">
+                    <i class="bi bi-send me-3 fs-6"></i>
+                    <span>Trip Ticket Request</span>
+                </span>
+                <i class="bi bi-chevron-right submenu-arrow small"></i>
+            </a>
+
+            <div class="collapse @(isRequestorAreaActive ? "show" : "") py-1" id="requestSubmenu">
+                <div class="d-flex flex-column gap-1">
+                    <a asp-controller="User" asp-action="CreateTicketPage"
+                       class="nav-link-sub d-flex align-items-center py-1.5 @(currentAction == "CreateTicketPage" ? "active" : "")">
+                        <span>Create Trip Ticket</span>
+                    </a>
+
+                    <a asp-controller="User" asp-action="TripSchedule"
+                       class="nav-link-sub d-flex align-items-center py-1.5 @(currentAction == "TripSchedule" ? "active" : "")">
+                        <span>Trip Schedule</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <a asp-controller="User" asp-action="ShuttleViewer"
+           class="nav-link-custom d-flex align-items-center px-3 py-2 mb-1 @(currentAction == "ShuttleViewer" ? "active" : "")">
+            <i class="bi  bi-bus-front-fill me-3 fs-6"></i>
+            <span>Shuttle Viewer</span>
+        </a>
     }
 </nav>
