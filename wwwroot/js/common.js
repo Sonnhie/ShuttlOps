@@ -208,6 +208,25 @@ const TableColumnsConfig = {
             className: 'text-center fw-medium',
         }
     },
+    Passenger: (field) => {
+        return {
+            data: field,
+            defaultContent: 'N/A',
+            className: 'text-center fw-medium',
+            render: function (data, type, row) {
+                if (!data) return 'N/A';
+                if (typeof data === 'object' && !Array.isArray(data)) {
+                    return data.PassengerName || 'N/A';
+                }
+
+                if (Array.isArray(data) && data.length > 0) {
+                    return data.map(p => p.PassengerName).join(', ');
+                }
+
+                return 'N/A';
+            }
+        }
+    },
     Number: (field) => {
         return {
             data: field,
@@ -243,8 +262,8 @@ const TableColumnsConfig = {
                 else if (data === 'Pending GA Approve') {
                     return `<span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2 py-1">Pending GA Approve</span>`;
                 }
-                else if (data === 'Approved') {
-                    return `<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">Ready for Dispatch</span>`;
+                else if (data === 'GA Approved') {
+                    return `<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">GA Approved</span>`;
                 }
                 else if (data === 'Rejected') {
                     return `<span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1">Rejected</span>`;
@@ -352,7 +371,7 @@ const createSelectOptions = (selectId, options = {}) => {
             const items = settings.dataSrc(response) || [];
 
             selectElement.empty().prop("disabled", false);
-            selectElement.append(`<option value="">Select ${settings.placeholder}</option>`);
+            selectElement.append(`<option value="">-- Select ${settings.placeholder}</option>`);
 
             $.each(items, function (index, item) {
                 const val = item[settings.valueField];

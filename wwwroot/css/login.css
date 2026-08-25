@@ -140,9 +140,63 @@
         opacity: 0;
     }
 
-    .btn-login:active::after {
+.btn-login:active::after {
         width: 200px;
         height: 200px;
         opacity: 1;
         transition: 0s;
     }
+
+/* Enterprise authentication experience */
+.login-body {
+    background: #eef3fa;
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    animation: none;
+}
+.auth-shell { min-height: 100vh; padding: 2rem; }
+.auth-panel {
+    width: min(1040px, 100%);
+    min-height: 600px;
+    background: #fff;
+    border: 1px solid #dce3ed;
+    border-radius: 18px;
+    box-shadow: 0 24px 60px rgba(16,42,67,.13);
+    overflow: hidden;
+}
+.auth-aside {
+    position: relative;
+    overflow: hidden;
+    padding: 3rem;
+    background: linear-gradient(145deg, #102a43 0%, #123f70 58%, #1769e0 135%);
+    color: #fff;
+}
+.auth-aside::after {
+    content: '';
+    position: absolute;
+    right: -110px;
+    bottom: -135px;
+    width: 310px;
+    height: 310px;
+    border: 1px solid rgba(255,255,255,.22);
+    border-radius: 50%;
+    box-shadow: 0 0 0 38px rgba(255,255,255,.045), 0 0 0 78px rgba(255,255,255,.035);
+}
+.auth-brand { position: relative; z-index: 1; }
+.auth-brand-mark { width: 44px; height: 44px; border-radius: 12px; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.2); display: inline-flex; align-items: center; justify-content: center; }
+.auth-kicker { color: #a9d8ff; font-size: .7rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.auth-feature-list { position: relative; z-index: 1; list-style: none; margin: 2.75rem 0 0; padding: 0; }
+.auth-feature-list li { display: flex; align-items: center; gap: .7rem; margin-bottom: 1rem; color: rgba(255,255,255,.8); font-size: .88rem; }
+.auth-feature-list i { color: #7dd3fc; }
+.auth-form-wrap { max-width: 380px; width: 100%; }
+.auth-form-wrap h1 { color: #102a43; font-size: 1.7rem; letter-spacing: -.03em; }
+.auth-form-wrap .form-floating .form-control { border-radius: 9px; border-color: #cfd8e3; min-height: 58px; box-shadow: none; }
+.auth-form-wrap .form-floating .form-control:focus { border-color: #1769e0; box-shadow: 0 0 0 .2rem rgba(23,105,224,.12); }
+.auth-form-wrap .form-floating label { color: #66758a; }
+.btn-login { border-radius: 9px; background: #1769e0; min-height: 48px; }
+.btn-login:hover { background: #0b56c7; }
+.auth-security-note { color: #66758a; font-size: .73rem; }
+@media (max-width: 767.98px) {
+    .auth-shell { padding: 1rem; }
+    .auth-panel { min-height: auto; }
+    .auth-form-side { padding: 2.5rem 1.75rem !important; }
+}

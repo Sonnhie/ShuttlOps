@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using ShuttlOps.Services;
 using ShuttlOps.ViewModel.Auth;
+using System.Security.Claims;
 
 namespace ShuttlOps.Controllers
 {
@@ -29,7 +30,7 @@ namespace ShuttlOps.Controllers
             
             string redirectUrl;
 
-            var roleClaim = HttpContext.User.FindFirst("Role")?.Value;
+            var roleClaim = HttpContext.User.FindFirst(ClaimTypes.Role)?.Value;
 
             if (roleClaim == "Admin")
             {

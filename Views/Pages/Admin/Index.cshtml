@@ -1,103 +1,62 @@
-﻿@model IEnumerable<ShuttlOps.Models.TripTicket>
+@model IEnumerable<ShuttlOps.Models.TripTicket>
 @{
-    ViewData["Title"] = "Admin Dispatch Dashboard";
-
-    // Fallback to empty enumerable if Model is null
+    ViewData["Title"] = "Dispatch Dashboard";
     var tickets = Model ?? Enumerable.Empty<ShuttlOps.Models.TripTicket>();
     var pendingList = tickets.Where(t => t.ApprovalStatus == "Pending");
 }
 
-<div class="d-flex flex-column gap-4 mb-4">
-    <!-- HEADER -->
-    <div class="d-flex justify-content-between align-items-end pb-3 border-bottom">
-        <div>
-            <h1 class="h4 fw-bold text-dark mb-1 d-flex align-items-center">
-                <i class="bi bi-speedometer2 me-2 text-primary"></i> Dispatch Dashboard
-            </h1>
-            <p class="text-muted small mb-0">Overview and pending approvals requiring your attention.</p>
-        </div>
+<div class="d-flex flex-column gap-4">
+    <div class="portal-page-header">
+        <div class="eyebrow mb-1">Operations control</div>
+        <h1 class="fw-bold mb-1">Dispatch dashboard</h1>
+        <p class="mb-0">Review approvals and keep the transportation workflow moving.</p>
     </div>
 
-    <!-- Metric Cards -->
     <div class="row g-3">
         <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card p-3 d-flex flex-row align-items-center gap-3">
-                <div class="rounded-circle bg-warning bg-opacity-10 d-flex align-items-center justify-content-center text-warning" style="width: 48px; height: 48px;">
-                    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
-                </div>
-                <div>
-                    <div class="text-muted text-uppercase fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Pending Approvals</div>
-                    <h3 class="fw-bold mb-0 text-dark fs-4">@pendingList.Count()</h3>
-                </div>
+            <div class="card metric-card p-3 d-flex flex-row align-items-center gap-3" style="--metric-color: #e69a16;">
+                <span class="metric-icon bg-warning bg-opacity-10 text-warning"><i class="bi bi-hourglass-split fs-5"></i></span>
+                <div><div class="metric-label">Pending approvals</div><div class="metric-value mt-1">@pendingList.Count()</div></div>
             </div>
         </div>
-        <!-- Note: You can easily stack more metric cards in this row (e.g., Today's Trips, Active Drivers) -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card metric-card p-3 d-flex flex-row align-items-center gap-3" style="--metric-color: #1769e0;">
+                <span class="metric-icon bg-primary bg-opacity-10 text-primary"><i class="bi bi-ticket-perforated fs-5"></i></span>
+                <div><div class="metric-label">Total requests</div><div class="metric-value mt-1">@tickets.Count()</div></div>
+            </div>
+        </div>
     </div>
 
-    <!-- Pending Table Queue -->
-    <div class="card p-0 overflow-hidden">
-        <div class="card-header bg-transparent py-3 border-bottom px-4">
-            <h6 class="fw-semibold text-dark mb-0 d-flex align-items-center">
-                <i class="bi bi-clock-history text-warning me-2"></i>Pending Approval Queue
-            </h6>
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+                <span class="section-icon"><i class="bi bi-clipboard-check"></i></span>
+                <div><h2 class="card-title fw-bold mb-0">Pending approval queue</h2><span class="text-muted small">Requests awaiting an operational decision</span></div>
+            </div>
+            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-3 py-2">@pendingList.Count() awaiting review</span>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0 w-100">
-                    <thead class="bg-light text-muted text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.05em;">
-                        <tr>
-                            <th class="px-4 py-3 border-bottom-0">Ticket Ref</th>
-                            <th class="py-3 border-bottom-0">Requestor</th>
-                            <th class="py-3 border-bottom-0">Trip Date & Time</th>
-                            <th class="py-3 border-bottom-0">Route</th>
-                            <th class="text-end pe-4 py-3 border-bottom-0">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-dark small border-top">
-                        @if (!pendingList.Any())
+                    <thead><tr><th>Ticket ref</th><th>Requestor</th><th>Trip date & time</th><th>Route</th><th class="text-end">Action</th></tr></thead>
+                    <tbody>
+                    @if (!pendingList.Any())
+                    {
+                        <tr><td colspan="5" class="text-center py-5 text-muted"><i class="bi bi-check-circle-fill text-success fs-4 d-block mb-2"></i><span class="fw-semibold">No pending approvals</span><br /><small>Your approval queue is clear.</small></td></tr>
+                    }
+                    else
+                    {
+                        @foreach (var ticket in pendingList)
                         {
                             <tr>
-                                <td colspan="5" class="text-center py-5 text-muted fw-medium">
-                                    <i class="bi bi-check-circle me-2 text-success fs-5"></i><br />
-                                    No pending approvals at this time.
-                                </td>
+                                <td><span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1">@ticket.TicketNumber</span></td>
+                                <td><div class="fw-semibold">@ticket.RequestorName</div><small class="text-muted">ID: @ticket.RequestorId</small></td>
+                                <td><div class="fw-semibold">@ticket.DateOfTrip.ToString("MMM dd, yyyy")</div><small class="text-muted">@ticket.EstDepartureTime.ToString("hh:mm tt")</small></td>
+                                <td><div class="fw-medium">@ticket.PickupLocation <i class="bi bi-arrow-right text-muted mx-1"></i> @ticket.DropoffLocation</div><small class="text-muted d-inline-block text-truncate" style="max-width: 250px;">@ticket.Purpose</small></td>
+                                <td class="text-end"><form asp-controller="Admin" asp-action="ApproveTicket" method="post" class="d-inline"><input type="hidden" name="ticketId" value="@ticket.TicketId" /><button type="submit" class="btn btn-sm btn-success px-3"><i class="bi bi-check2 me-1"></i>Approve</button></form></td>
                             </tr>
                         }
-                        else
-                        {
-                            @foreach (var ticket in pendingList)
-                            {
-                                <tr>
-                                    <td class="ps-4 fw-bold text-primary">
-                                        <span class="badge bg-light text-primary border border-primary border-opacity-25 px-2 py-1 tracking-wider">
-                                            @ticket.TicketNumber
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="fw-semibold text-dark">@ticket.RequestorName</div>
-                                        <div class="text-muted" style="font-size: 0.75rem;">ID: @ticket.RequestorId</div>
-                                    </td>
-                                    <td>
-                                        <div class="fw-semibold text-dark">@ticket.DateOfTrip.ToString("MMM dd, yyyy")</div>
-                                        <div class="text-muted" style="font-size: 0.75rem;">@ticket.EstDepartureTime.ToString("hh:mm tt")</div>
-                                    </td>
-                                    <td>
-                                        <div class="fw-medium">@ticket.PickupLocation → @ticket.DropoffLocation</div>
-                                        <div class="text-muted text-truncate" style="font-size: 0.75rem; max-width: 250px;" title="@ticket.Purpose">
-                                            Purpose: @ticket.Purpose
-                                        </div>
-                                    </td>
-                                    <td class="text-end pe-4">
-                                        <form asp-controller="Admin" asp-action="ApproveTicket" method="post" class="d-inline">
-                                            <input type="hidden" name="ticketId" value="@ticket.TicketId" />
-                                            <button type="submit" class="btn btn-sm btn-success px-3 fw-medium d-inline-flex align-items-center gap-1">
-                                                <i class="bi bi-check2"></i> Approve
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            }
-                        }
+                    }
                     </tbody>
                 </table>
             </div>

@@ -30,8 +30,8 @@
                         <option value="">All Statuses</option>
                         <option value="Pending Section Head">Pending Section Head</option>
                         <option value="Pending GA Approve">Pending GA Approve</option>
-                        <option value="Approved">Approved</option>
-                        <option value="Cancelled">Cancelled</option>
+                        <option value="GA Approved">Approved</option>
+                        <option value="Request for cancellation">Request for Cancellation</option>
                     </select>
                 </div>
             </div>
@@ -44,13 +44,24 @@
                 <div class="table-responsive m-3">
                     <partial name="~/Views/Shared/Partials/Table/_GenericTablePartial.cshtml" 
                         model='new ReusableTableDTO {
-                            TableHeaders = new List<string> { "Ticket Number", "Status", "Date Of Trip" , "Departure Time", "Pickup Location", "Dropoff Location", "Purpose", "Action"},
+                            TableHeaders = new List<string> { "Ticket Number", "Requestor" , "Department", "Status", "Date Of Trip" , "Departure Time", "Pickup Location", "Dropoff Location", "Passenger", "Purpose", "Action"},
                             TableId  = "TripScheduleTable"
                         }'/>
                 </div>
             </div>
         </div>
     </div>
+
+    
+    <partial name="~/Views/Shared/Partials/Modal/_GenericModal.cshtml"
+            model= 'new ReusableModalDTO {
+                   ModalId = "AssignDriverModal",
+                   ModalTitle = "Assign Driver",
+                   ModalIcon = "bi-car-front-fill",
+                   FormId = "AssignDriverForm",
+                   SubmitButtonText = "Assign",
+                   BodyPartialName = "~/Views/Shared/Partials/Forms/_DispatchForm.cshtml"
+        }'/>
 </div>
 
 @section Scripts {

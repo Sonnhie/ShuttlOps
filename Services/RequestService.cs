@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using ShuttlOps.DTOs;
@@ -89,6 +90,7 @@ namespace ShuttlOps.Services
                     TicketId = t.TicketId,
                     TicketNumber = t.TicketNumber,
                     RequestDate = DateOnly.FromDateTime(t.DateRequested),
+                    RequestDepartment = t.RequestedDepartment ?? "",
                     TripDate = t.DateOfTrip,
                     DepartureTime = t.EstDepartureTime,
                     ArrivalTime = t.EstArrivalTime,
@@ -97,6 +99,7 @@ namespace ShuttlOps.Services
                     Purpose = t.Purpose,
                     Remarks = null, 
                     ApprovalStatus = t.ApprovalStatus,
+                    Requestor = t.RequestorName,
                     Passengers = t.TripTicketPassengers.Select(p => new PassengerDTO
                     {
                         PassengerName = p.PassengerName
@@ -106,7 +109,7 @@ namespace ShuttlOps.Services
             return requests;
         }
 
-        public async Task<(bool isSuccess, string message)> SectionRequest(string status, int id)
+        public async Task<(bool isSuccess, string message)> RequestApproval(string status, int id)
         {
             try
             {
@@ -158,6 +161,82 @@ namespace ShuttlOps.Services
             {
                 logger.LogError(ex, "Error deleting request");
                 return (false, $"Error deleting request: {ex.Message}");
+            }
+        }
+
+        public async Task<List<DriverDTO>> GetDriver()
+        {
+            try
+            {
+                var drivers = await dbContext.Drivers
+                            .Where(d => d.Status != "Maintenance" || d.Status != "On Leave" || d.Status != "Suspended")
+                            .Select(d => new DriverDTO
+                            {
+                                Id = d.DriverId,
+                                DriverName = d.DriverName,
+                                LicenseNumber = d.LicenseNumber ?? "",
+                                Status = d.Status
+                            })
+                            .ToListAsync();
+
+                return drivers;
+            }
+            catch
+            {
+                return [];
+            }
+        }
+
+        
+        public async Task<List<VehicleDTO>> GetVehicle()
+        {
+            try
+            {
+                var vehicle = await dbContext.Vehicles
+                               .Where(v => v.Status != "In Transit" ||  v.Status != "Under Maintenance" || v.Status != "Decommissioned")
+                               .Select(v => new VehicleDTO
+                               {
+                                   Id = v.VehicleId,
+                                   VehicleModel = v.VehicleModel,
+                                   PlateNumber = v.PlateNumber,
+                                   Capacity = v.Capacity
+                               })
+                               .ToListAsync();
+                return vehicle;
+            }
+            catch
+            {
+                return [];
+            }
+        }
+
+        public async Task<string> GetPlatenumber(int id)
+        {
+            try
+            {
+                var Platenumber = await dbContext.Vehicles.Where(v => v.VehicleId == id).Select(v => v.PlateNumber).FirstOrDefaultAsync();
+                return Platenumber ?? "";
+            }
+            catch
+            {
+                return string.Empty ?? "";
+            }
+        }
+
+        public async Task<int> GetCapacity(int id)
+        {
+            try
+            {
+                var capacity = await dbContext
+                              .Vehicles
+                              .Where(c => c.VehicleId == id)
+                              .Select(c => c.Capacity)
+                              .FirstOrDefaultAsync();
+                return capacity;
+            }
+            catch
+            {
+                return 0;
             }
         }
     }

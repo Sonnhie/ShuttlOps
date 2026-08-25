@@ -20,5 +20,6 @@ namespace ShuttlOps.Services
         Task<List<AccessDTO>> GetPermissionList();
         Task<(bool isSuccess, string message)> UpdatePermission(AccessPayloadDTO payload);
         Task<(bool isSuccess, string message)> CreatePermission(AccessDTO access);
+        
     }
 }

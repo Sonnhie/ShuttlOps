@@ -1,62 +1,37 @@
-﻿@using ShuttlOps.DTOs
-﻿@{
+@using ShuttlOps.DTOs
+@{
     ViewData["Title"] = "Groups and Clusters";
 }
 
-
-<div class="container-fluid mt-3">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h5 class="mb-3">Department</h5>
-        <div class="d-flex align-items-center gap-2">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#AddDepartmentModal">
-                <i class="bi bi-plus"></i> Add Department
-            </button>
+<div class="d-flex flex-column gap-4">
+    <div class="portal-page-header d-flex justify-content-between align-items-sm-end flex-column flex-sm-row gap-3">
+        <div>
+            <div class="eyebrow mb-1">Administration</div>
+            <h1 class="fw-bold mb-1">Groups and clusters</h1>
+            <p class="mb-0">Maintain department structures used for trip ownership and operational reporting.</p>
         </div>
+        <button type="button" class="btn btn-primary px-3" data-bs-toggle="modal" data-bs-target="#AddDepartmentModal"><i class="bi bi-plus-lg me-2"></i>Add department</button>
     </div>
 
-    <div class="card mb-3 border-0 shadow-sm">
-        <div class="card-body py-2">
-            <div class="row align-items-center">
-                <div class="col-auto">
-                    <label for="departmentFilter" class="col-form-label fw-bold text-muted me-2">
-                        <i class="bi bi-funnel me-1"></i> Filter Department:
-                    </label>
-                </div>
-                <div class="col-auto">
-                    <select id="departmentFilter" class="form-select form-select-sm shadow-none" style="min-width: 160px;">
-                    </select>
-                </div>
-            </div>
-        </div>
-        <div class="card border-0 shadow-sm rounded-3">
-            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-                <h5 class="card-title fw-bold text-primary mb-0"><i class="bi bi-list-task me-2"></i>Department Directory</h5>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive m-3">
-                    <partial name="~/Views/Shared/Partials/Table/_GenericTablePartial.cshtml" 
-                            model= 'new ReusableTableDTO {
-                                    TableHeaders = new List<string> { "Department ID", "Department Name" , "Manager Id", "Members Count", "Action" },
-                                    TableId = "departmentTable"
-                        }'/>
-                </div>
-            </div>
-
-        </div>
+    <div class="filter-bar d-flex align-items-center gap-3 flex-wrap">
+        <span class="section-icon"><i class="bi bi-funnel"></i></span>
+        <label for="departmentFilter" class="filter-label mb-0">Department</label>
+        <select id="departmentFilter" class="form-select form-select-sm shadow-none"></select>
     </div>
 
+    <div class="card">
+        <div class="card-header d-flex align-items-center gap-2">
+            <span class="section-icon"><i class="bi bi-diagram-3"></i></span>
+            <div><h2 class="card-title fw-bold mb-0">Department directory</h2><span class="text-muted small">Organizational groups and accountable managers</span></div>
+        </div>
+        <div class="card-body p-0"><div class="table-responsive m-3">
+            <partial name="~/Views/Shared/Partials/Table/_GenericTablePartial.cshtml"
+                     model='new ReusableTableDTO { TableHeaders = new List<string> { "Department ID", "Department Name", "Manager Id", "Members Count", "Action" }, TableId = "departmentTable" }' />
+        </div></div>
+    </div>
 
     <partial name="~/Views/Shared/Partials/Modal/_GenericModal.cshtml"
-            model= 'new ReusableModalDTO {
-                   ModalId = "AddDepartmentModal",
-                   ModalTitle = "Create Department",
-                   ModalIcon = "bi-folder-fill",
-                   FormId = "AddDepartmentForm",
-                   SubmitButtonText = "Create",
-                   BodyPartialName = "~/Views/Shared/Partials/Forms/_DepartmentFormPartial.cshtml"
-        }'/>
+             model='new ReusableModalDTO { ModalId = "AddDepartmentModal", ModalTitle = "Create Department", ModalIcon = "bi-folder-fill", FormId = "AddDepartmentForm", SubmitButtonText = "Create department", BodyPartialName = "~/Views/Shared/Partials/Forms/_DepartmentFormPartial.cshtml" }' />
 </div>
 
-@section Scripts {
-    <script src="~/js/Group.js"></script>
-}
+@section Scripts { <script src="~/js/Group.js"></script> }

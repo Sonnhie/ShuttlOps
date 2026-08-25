@@ -17,5 +17,5 @@ public partial class Vehicle
 
     public bool IsActive { get; set; }
 
-    public virtual ICollection<DispatchDetail> DispatchDetails { get; set; } = new List<DispatchDetail>();
+    public virtual ICollection<DispatchDetail> DispatchDetails { get; set; } = [];
 }

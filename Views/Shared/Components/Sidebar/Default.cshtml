@@ -15,8 +15,7 @@
         var isGAArea = currentController == "GA";
         var isRequestorArea = currentController == "Request";
 
-        var isAdminAreaActive = isAdminArea && isRequestorArea && (currentAction == "CreateTicketPage" || currentAction == "TripSchedule" || currentAction == "ShuttleViewer" ||
-        currentAction == "Users" || currentAction == "Groups" || currentAction == "Modules" || currentAction == "Access");
+        var isAdminAreaActive = isAdminArea && (currentAction == "Users" || currentAction == "Groups" || currentAction == "Modules" || currentAction == "Access");
 
         var isRequestorAreaActive = isRequestorArea && (currentAction == "CreateTicketPage" || currentAction == "TripSchedule" || currentAction == "ShuttleViewer");
 
@@ -24,7 +23,7 @@
 
     @if (showAdminMenu)
     {
-        <div class="text-uppercase text-muted px-3 mb-2" style="font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em;">
+        <div class="nav-section-label text-uppercase mb-2">
             Main Menu
         </div>
 
@@ -36,7 +35,7 @@
 
 
 
-        <div class="text-uppercase text-muted px-3 mb-2 mt-4" style="font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em;">
+        <div class="nav-section-label text-uppercase mb-2 mt-4">
             Admin Menu
         </div>
         <div class="nav-item-group mb-1">
@@ -85,7 +84,7 @@
 
     @if (showRequestorMenu)
     {
-        <div class="text-uppercase text-muted px-3 mb-2" style="font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em;">
+        <div class="nav-section-label text-uppercase mb-2">
             Main Menu
         </div>
 
@@ -131,7 +130,7 @@
 
     @if (showGAMenu)
     {
-        <div class="text-uppercase text-muted px-3 mb-2" style="font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em;">
+        <div class="nav-section-label text-uppercase mb-2">
             Main Menu
         </div>
 

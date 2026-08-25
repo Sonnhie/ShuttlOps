@@ -52,7 +52,29 @@ namespace ShuttlOps.Controllers
         [HttpPost]
         public async Task<IActionResult> SectionRequestApproval(string status, int id)
         {
-            var (isSuccess, message) = await requestService.SectionRequest(status, id);
+            var (isSuccess, message) = await requestService.RequestApproval(status, id);
+            if (isSuccess)
+            {
+                return new JsonResult(new
+                {
+                    success = true,
+                    message = message
+                });
+            }
+            else
+            {
+                return new JsonResult(new
+                {
+                    success = false,
+                    message = message
+                });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GARequestApproval(string status, int id)
+        {
+            var (isSuccess, message) = await requestService.RequestApproval(status, id);
             if (isSuccess)
             {
                 return new JsonResult(new
@@ -97,7 +119,7 @@ namespace ShuttlOps.Controllers
         [HttpPost]
         public async Task<IActionResult> RequestDelete(string status, int id)
         {
-            var (isSuccess, message) = await requestService.SectionRequest(status, id);
+            var (isSuccess, message) = await requestService.RequestApproval(status, id);
             if (isSuccess)
             {
                 return new JsonResult(new
@@ -114,6 +136,34 @@ namespace ShuttlOps.Controllers
                     message = message
                 });
             }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetDrivers()
+        {
+            var result = await requestService.GetDriver();
+            return new JsonResult(result);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetVehicle()
+        {
+            var result = await requestService.GetVehicle();
+            return new JsonResult(result);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetPlatenumber(int id)
+        {
+            var result = await requestService.GetPlatenumber(id);
+            return new JsonResult(result);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetCapacity(int id)
+        {
+            var result = await requestService.GetCapacity(id);
+            return new JsonResult(result);
         }
     }
 }

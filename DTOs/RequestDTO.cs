@@ -37,6 +37,8 @@
         public string Purpose { get; set; } = null!;
         public string? Remarks { get; set; }
         public string ApprovalStatus { get; set; } = "Pending";
+        public string RequestDepartment { get; set; } = null!;
+        public string Requestor { get; set; } = null!;
 
         public List<PassengerDTO> Passengers { get; set; } = new();
     }

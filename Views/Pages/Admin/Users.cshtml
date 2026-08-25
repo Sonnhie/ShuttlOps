@@ -1,64 +1,52 @@
-﻿@using ShuttlOps.DTOs
+@using ShuttlOps.DTOs
 @{
     ViewData["Title"] = "User Management";
 }
 
 <div class="d-flex flex-column gap-4">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-sm-center flex-column flex-sm-row gap-3">
+    <div class="portal-page-header d-flex justify-content-between align-items-sm-end flex-column flex-sm-row gap-3">
         <div>
-            <h1 class="h3 fw-bold mb-1">User List</h1>
-            <p class="text-muted mb-0">Manage user profile details, update credentials, and configure account settings.</p>
+            <div class="eyebrow mb-1">Administration</div>
+            <h1 class="fw-bold mb-1">User management</h1>
+            <p class="mb-0">Manage user identities, organizational assignment, and role access.</p>
         </div>
-        <div>
-           <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#AddUserModal">
-                <i class="bi bi-person-add me-1"></i> Add User
-           </button>
-        </div>
+        <button type="button" class="btn btn-primary px-3" data-bs-toggle="modal" data-bs-target="#AddUserModal">
+            <i class="bi bi-person-plus me-2"></i>Add user
+        </button>
     </div>
-    <div class="card mb-3 border-0 shadow-sm">
-        <div class="card-body py-2">
-            <div class="row align-items-center">
-                <div class="col-auto">
-                    <label for="departmentFilter" class="col-form-label fw-bold text-muted me-2">
-                        <i class="bi bi-funnel me-1"></i> Filter Department:
-                    </label>
-                </div>
-                <div class="col-auto">
-                    <select id="departmentFilter" class="form-select form-select-sm shadow-none" style="min-width: 160px;">
-                    </select>
-                </div>
+
+    <div class="filter-bar d-flex align-items-center gap-3 flex-wrap">
+        <span class="section-icon"><i class="bi bi-funnel"></i></span>
+        <label for="departmentFilter" class="filter-label mb-0">Department</label>
+        <select id="departmentFilter" class="form-select form-select-sm shadow-none"></select>
+    </div>
+
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+                <span class="section-icon"><i class="bi bi-people"></i></span>
+                <div><h2 class="card-title fw-bold mb-0">User directory</h2><span class="text-muted small">All registered portal users</span></div>
             </div>
         </div>
-        <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-                <h5 class="card-title fw-bold text-primary mb-0"><i class="bi bi-list-task me-2"></i>User Directory</h5>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive m-3">
-                    <partial name="~/Views/Shared/Partials/Table/_GenericTablePartial.cshtml" 
-                        model='new ReusableTableDTO {
-                            TableHeaders = new List<string> { "Employee ID", "Employee Name", "Email Address", "Department", "Role", "Action"},
-                            TableId  = "UserManagementTable"
-                        }'/>
-                </div>
+        <div class="card-body p-0">
+            <div class="table-responsive m-3">
+                <partial name="~/Views/Shared/Partials/Table/_GenericTablePartial.cshtml"
+                         model='new ReusableTableDTO {
+                             TableHeaders = new List<string> { "Employee ID", "Employee Name", "Email Address", "Department", "Role", "Action"},
+                             TableId = "UserManagementTable"
+                         }' />
             </div>
         </div>
     </div>
 
-     <partial 
-         name="~/Views/Shared/Partials/Modal/_GenericModal.cshtml"
-         model= 'new ReusableModalDTO {
-                   ModalId = "AddUserModal",
-                   ModalTitle = "Create User Account",
-                   ModalIcon = "bi-person-plus-fill",
-                   FormId = "AddUserForm",
-                   SubmitButtonText = "Create",
-                   BodyPartialName = "~/Views/Shared/Partials/Forms/_CreateUserFormPartial.cshtml"
-         }'/>
+    <partial name="~/Views/Shared/Partials/Modal/_GenericModal.cshtml"
+             model='new ReusableModalDTO {
+                 ModalId = "AddUserModal", ModalTitle = "Create User Account", ModalIcon = "bi-person-plus-fill",
+                 FormId = "AddUserForm", SubmitButtonText = "Create user",
+                 BodyPartialName = "~/Views/Shared/Partials/Forms/_CreateUserFormPartial.cshtml"
+             }' />
 </div>
 
- 
 @section Scripts {
-    <script src="~/js/User.js "></script>
+    <script src="~/js/User.js"></script>
 }
