@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace ShuttlOps.Models;
@@ -47,3 +47,4 @@ public partial class TripTicket
 
     public virtual ICollection<TripTicketPassenger> TripTicketPassengers { get; set; } = new List<TripTicketPassenger>();
 }
+

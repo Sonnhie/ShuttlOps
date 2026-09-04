@@ -1,23 +1,43 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShuttlOps.DTOs;
 using ShuttlOps.Models;
-using System.Reflection.Metadata.Ecma335;
+using ShuttlOps.Services.Interfaces;
+using System.Security.Claims;
 
-namespace ShuttlOps.Services
+namespace ShuttlOps.Services.MainServices
 {
-    [Authorize(Roles = "Admin")]
     public class AdminService(
         ShuttlOpsDbContext dbContext,
-        ILogger<AdminService> logger
+        ILogger<AdminService> logger,
+        IHttpContextAccessor httpContextAccessor
     ) : IAdminservice
     {
+        private bool IsCallerGAOnly()
+        {
+            var user = httpContextAccessor.HttpContext?.User;
+            if (user == null) return false;
+            return user.IsInRole("GA") && !user.IsInRole("Admin");
+        }
+
         public async Task<List<UserDto>> GetAllUsers()
         {
             try
             {
-                var result = await dbContext.UserTables
+                var query = dbContext.UserTables
+                    .Include(u => u.Role)
+                    .Include(u => u.Department)
+                    .AsQueryable();
+
+                // If caller is GA, exclude Admin accounts
+                if (IsCallerGAOnly())
+                {
+                    query = query.Where(u => u.Role.RoleName != "Admin");
+                }
+
+                var result = await query
                     .Select(u => new UserDto
                     {
                         Id = u.Id,
@@ -57,14 +77,22 @@ namespace ShuttlOps.Services
         {
             try
             {
-                var result = await dbContext.RoleTables
+                var query = dbContext.RoleTables.AsQueryable();
+
+                // If caller is GA, exclude Admin from selectable roles
+                if (IsCallerGAOnly())
+                {
+                    query = query.Where(r => r.RoleName != "Admin");
+                }
+
+                var result = await query
                             .Select(r => new { r.RoleId, r.RoleName })
                             .ToListAsync();
                 return result;
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while retrieving all departments.");
+                logger.LogError(ex, "An error occurred while retrieving all roles.");
                 return Array.Empty<object>();
             }
         }
@@ -89,36 +117,57 @@ namespace ShuttlOps.Services
         {
             try
             {
-                if(userDto == null)
+                if (userDto == null)
                 {
                     return (false, "User data is null.");
                 }
 
-                var isUserExist = await dbContext.UserTables.FirstOrDefaultAsync(x => x.UserName == userDto.EmployeeID);
+                if (string.IsNullOrWhiteSpace(userDto.EmployeeID) || string.IsNullOrWhiteSpace(userDto.EmployeeName))
+                {
+                    return (false, "Employee ID and Employee Name are required.");
+                }
 
+                int? roleId = int.TryParse(userDto.Role, out int parseRoleId) ? parseRoleId : null;
+                if (roleId == null)
+                {
+                    return (false, "Invalid role selected.");
+                }
+
+                var targetRole = await dbContext.RoleTables.FindAsync(roleId.Value);
+                if (targetRole == null)
+                {
+                    return (false, "Selected role does not exist.");
+                }
+
+                // Prevent GA from assigning Admin role
+                if (IsCallerGAOnly() && targetRole.RoleName == "Admin")
+                {
+                    return (false, "General Affairs cannot create or assign Admin accounts.");
+                }
+
+                var isUserExist = await dbContext.UserTables.FirstOrDefaultAsync(x => x.UserName == userDto.EmployeeID);
                 if (isUserExist != null)
                 {
-                    return (false, "User already exit on the database.");
+                    return (false, "User with this Employee ID already exists.");
                 }
 
                 string hashedPassword = BCrypt.Net.BCrypt.HashPassword("Password01");
+                int departmentId = int.TryParse(userDto.Department, out int parseDeptId) ? parseDeptId : 1;
 
-                int? departmentId = int.TryParse(userDto.Department, out int parseId) ? parseId : null;
-                int? roleId = int.TryParse(userDto.Role, out int parseRoldId) ? parseRoldId : null;
                 var newUser = new UserTable
                 {
                     UserName = userDto.EmployeeID,
                     Password = hashedPassword,
                     EmailAdd = userDto.Email,
-                    DepartmentId = parseId,
-                    RoleId = parseRoldId,
+                    DepartmentId = departmentId,
+                    RoleId = roleId.Value,
                     EmployeeName = userDto.EmployeeName,
-                    CreatedAt = DateTime.Now,
+                    CreatedAt = DateTime.UtcNow,
                 };
 
                 dbContext.UserTables.Add(newUser);
                 await dbContext.SaveChangesAsync();
-                return (true, "User created successfully");
+                return (true, "User created successfully.");
             }
             catch (Exception ex)
             {
@@ -131,10 +180,16 @@ namespace ShuttlOps.Services
         {
             try
             {
-                var isUserExist = await dbContext.UserTables.FirstOrDefaultAsync(x => x.Id == id);
+                var isUserExist = await dbContext.UserTables.Include(u => u.Role).FirstOrDefaultAsync(x => x.Id == id);
                 if (isUserExist == null)
                 {
-                    return (false, "User not exist on the database.");
+                    return (false, "User does not exist in the database.");
+                }
+
+                // Prevent GA from deleting Admin accounts
+                if (IsCallerGAOnly() && isUserExist.Role?.RoleName == "Admin")
+                {
+                    return (false, "General Affairs cannot delete Admin accounts.");
                 }
 
                 dbContext.UserTables.Remove(isUserExist);
@@ -152,16 +207,22 @@ namespace ShuttlOps.Services
         {
             try
             {
-                var isUserExist = await dbContext.UserTables.FirstOrDefaultAsync(x => x.Id==id);
+                var isUserExist = await dbContext.UserTables.Include(u => u.Role).FirstOrDefaultAsync(x => x.Id == id);
                 if (isUserExist == null)
                 {
-                    return (false, "User not exist on the database.");
+                    return (false, "User does not exist in the database.");
+                }
+
+                // Prevent GA from resetting Admin accounts
+                if (IsCallerGAOnly() && isUserExist.Role?.RoleName == "Admin")
+                {
+                    return (false, "General Affairs cannot reset Admin passwords.");
                 }
 
                 string hashedPassword = BCrypt.Net.BCrypt.HashPassword("Password01");
                 isUserExist.Password = hashedPassword;
                 await dbContext.SaveChangesAsync();
-                return (true, "Password reset successfully.");
+                return (true, "Password reset successfully to default (Password01).");
             }
             catch (Exception ex)
             {
@@ -435,3 +496,4 @@ namespace ShuttlOps.Services
         }
     }
 }
+

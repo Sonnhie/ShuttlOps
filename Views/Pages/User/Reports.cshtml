@@ -1,0 +1,146 @@
+@using ShuttlOps.DTOs
+@{
+    ViewData["Title"] = "Transportation Reports";
+    var canFilterDepartment = User.IsInRole("GA") || User.IsInRole("Security") || User.IsInRole("Admin");
+    var filterColClass = canFilterDepartment ? "col-12 col-md-3" : "col-12 col-md-4";
+}
+
+<div class="d-flex flex-column gap-4 mb-4">
+    <!-- Header -->
+    <div class="portal-page-header d-flex justify-content-between align-items-sm-end flex-column flex-sm-row gap-3">
+        <div>
+            <div class="eyebrow mb-1">Reporting & Analytics</div>
+            <h1 class="fw-bold mb-1">Transportation Reports</h1>
+            <p class="mb-0 text-muted">Generate, filter, and export detailed reservation, shuttle dispatch, and passenger logs.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-controller="User" asp-action="Analytics" class="btn btn-sm btn-light border px-3">
+                <i class="bi bi-graph-up me-1"></i> Analytics Dashboard
+            </a>
+            <button type="button" class="btn btn-sm btn-primary px-3" id="btnResetFilters">
+                <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Filters
+            </button>
+        </div>
+    </div>
+
+    <!-- Quick Stats Cards -->
+    <div class="row g-3">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card metric-card p-3 d-flex flex-row align-items-center gap-3" style="--metric-color:#1769e0">
+                <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center text-primary" style="width: 44px; height: 44px;">
+                    <i class="bi bi-journal-text fs-5"></i>
+                </div>
+                <div>
+                    <div class="metric-label">Filtered Trips</div>
+                    <div class="metric-value mt-1 fs-5" id="reportCountFiltered">—</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card metric-card p-3 d-flex flex-row align-items-center gap-3" style="--metric-color:#198754">
+                <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center text-success" style="width: 44px; height: 44px;">
+                    <i class="bi bi-people fs-5"></i>
+                </div>
+                <div>
+                    <div class="metric-label">Passenger Headcount</div>
+                    <div class="metric-value mt-1 fs-5" id="reportCountPassengers">—</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card metric-card p-3 d-flex flex-row align-items-center gap-3" style="--metric-color:#e69a16">
+                <div class="rounded-circle bg-warning bg-opacity-10 d-flex align-items-center justify-content-center text-warning" style="width: 44px; height: 44px;">
+                    <i class="bi bi-hourglass-split fs-5"></i>
+                </div>
+                <div>
+                    <div class="metric-label">Pending Clearance</div>
+                    <div class="metric-value mt-1 fs-5" id="reportCountPending">—</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card metric-card p-3 d-flex flex-row align-items-center gap-3" style="--metric-color:#19a7ce">
+                <div class="rounded-circle bg-info bg-opacity-10 d-flex align-items-center justify-content-center text-info" style="width: 44px; height: 44px;">
+                    <i class="bi bi-bus-front fs-5"></i>
+                </div>
+                <div>
+                    <div class="metric-label">Completed Dispatches</div>
+                    <div class="metric-value mt-1 fs-5" id="reportCountCompleted">—</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Toolbar Card -->
+    <div class="card p-3">
+        <div class="row g-3 align-items-end">
+            <div class="@filterColClass">
+                <label for="reportDateStart" class="form-label small fw-semibold text-muted mb-1">From Date</label>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white"><i class="bi bi-calendar"></i></span>
+                    <input type="text" id="reportDateStart" class="form-control modern-datepicker" placeholder="Start Date" />
+                </div>
+            </div>
+
+            <div class="@filterColClass">
+                <label for="reportDateEnd" class="form-label small fw-semibold text-muted mb-1">To Date</label>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white"><i class="bi bi-calendar-check"></i></span>
+                    <input type="text" id="reportDateEnd" class="form-control modern-datepicker" placeholder="End Date" />
+                </div>
+            </div>
+
+            @if (canFilterDepartment)
+            {
+                <div class="@filterColClass">
+                    <label for="reportDepartmentFilter" class="form-label small fw-semibold text-muted mb-1">Department</label>
+                    <select id="reportDepartmentFilter" class="form-select form-select-sm shadow-none">
+                        <option value="">All Departments</option>
+                    </select>
+                </div>
+            }
+
+            <div class="@filterColClass">
+                <label for="reportStatusFilter" class="form-label small fw-semibold text-muted mb-1">Approval / Dispatch Status</label>
+                <select id="reportStatusFilter" class="form-select form-select-sm shadow-none">
+                    <option value="">All Statuses</option>
+                    <option value="Pending Section Head">Pending Section</option>
+                    <option value="Pending GA Approve">Pending GA</option>
+                    <option value="GA Approved">GA Approved</option>
+                    <option value="Ready for Dispatch">Ready for Dispatch</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Report DataTable Card -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+                <span class="section-icon"><i class="bi bi-table"></i></span>
+                <div>
+                    <h2 class="card-title fw-bold mb-0">Trip & Dispatch Log</h2>
+                    <span class="text-muted small">Exportable master records with Excel, CSV, and search features</span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive m-3">
+                <partial name="~/Views/Shared/Partials/Table/_GenericTablePartial.cshtml"
+                         model='new ReusableTableDTO {
+                             TableHeaders = new List<string> { "Ticket Number", "Trip Date", "Time", "Requestor", "Department", "Pickup", "Destination", "Passengers", "Driver", "Status" },
+                             TableId = "ReportsTable"
+                         }' />
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/Reports.js" asp-append-version="true"></script>
+}

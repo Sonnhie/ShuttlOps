@@ -1,6 +1,6 @@
 ﻿using ShuttlOps.DTOs;
 
-namespace ShuttlOps.Services
+namespace ShuttlOps.Services.Interfaces
 {
     public interface IAdminservice
     {

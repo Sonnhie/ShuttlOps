@@ -22,6 +22,7 @@ public partial class SecurityLog
     public string? GuardSignatureName { get; set; }
 
     public DateTime? LoggedAt { get; set; }
+    public string? Remarks { get; set; }
 
     public virtual TripTicket Ticket { get; set; } = null!;
 }

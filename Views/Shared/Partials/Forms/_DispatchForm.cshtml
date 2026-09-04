@@ -1,4 +1,7 @@
-﻿<div class="row g-3 mb-4">
+﻿<input type="hidden" id="driverId" name="DriverId" value="" />
+<input type="hidden" id="vehicleId" name="VehicleId" value="" />
+<input type="hidden" id="ticketId" name="TicketId" />
+<div class="row g-3 mb-4">
     <div class="col-sm-12">
         <label class="form-label text-secondary small text-uppercase">
             Driver Name
@@ -6,6 +9,7 @@
         <select class="form-select shadow-sm border-secondary-subtle" id="driverName" name="driverName" required>
             
         </select>
+        <input type="hidden" id="driverSelect" name="DriverName" />
     </div>
     <div class="col-sm-12">
         <label class="form-label text-secondary small text-uppercase">
@@ -15,6 +19,8 @@
         </select>
     </div>
 </div>
+
+<!--Read only-->
 <div class="row g-3 mb-4">
     <div class="col-sm-12">
         <label class="form-label text-secondary small text-uppercase">
@@ -27,5 +33,17 @@
            Vehicle Capacity
         </label>
         <input class="form-control shadow-sm" id="capacity" readonly />
+    </div>
+    <div class="col-sm-12">
+        <label class="form-label text-secondary small text-uppercase">
+            Vehicle Status
+        </label>
+        <input class="form-control shadow-sm" id="Status" readonly />
+    </div>
+</div>
+<div class="row g-3 mb-4">
+    <div class="col-sm-12 form-floating">
+        <input class="form-control" placeholder="Leave a remarks here" id="Remarks" style="height: 100px"/>
+        <label class="form-label small" for="Remarks">GA Remarks</label>
     </div>
 </div>

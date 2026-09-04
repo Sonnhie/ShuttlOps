@@ -1,0 +1,99 @@
+@using ShuttlOps.DTOs
+@{
+    ViewData["Title"] = "Schedule Calendar";
+}
+
+<div class="d-flex flex-column gap-4 mb-4">
+    <!-- Header -->
+    <div class="portal-page-header d-flex justify-content-between align-items-sm-end flex-column flex-sm-row gap-3">
+        <div>
+            <div class="eyebrow mb-1">Route Scheduling</div>
+            <h1 class="fw-bold mb-1">Schedule Calendar</h1>
+            <p class="mb-0 text-muted">Monthly and weekly interactive dispatch calendar with route scheduling and passenger itineraries.</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap align-items-center">
+            <a asp-controller="User" asp-action="TripSchedule" class="btn btn-sm btn-outline-primary px-3">
+                <i class="bi bi-list-check me-1"></i> Trip Schedule
+            </a>
+            <a asp-controller="User" asp-action="CreateTicketPage" class="btn btn-sm btn-primary px-3">
+                <i class="bi bi-plus-lg me-1"></i> New Trip Request
+            </a>
+        </div>
+    </div>
+
+    <!-- Calendar Controls Bar -->
+    <div class="card p-3">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div class="d-flex align-items-center gap-2">
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-light border" id="calPrevMonth" type="button" title="Previous Month">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <button class="btn btn-sm btn-light border fw-semibold px-3" id="calTodayBtn" type="button">
+                        Today
+                    </button>
+                    <button class="btn btn-sm btn-light border" id="calNextMonth" type="button" title="Next Month">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+                <h4 class="fw-bold text-dark mb-0 ms-2" id="calendarMonthHeading">Month Year</h4>
+            </div>
+
+            <!-- Status Legends & Quick Filter -->
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <div class="d-flex align-items-center gap-2 small">
+                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2 py-1"><i class="bi bi-circle-fill me-1" style="font-size: 0.4rem;"></i> Not Started</span>
+                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1"><i class="bi bi-circle-fill me-1" style="font-size: 0.4rem;"></i> In Transit</span>
+                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1"><i class="bi bi-circle-fill me-1" style="font-size: 0.4rem;"></i> Completed</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar & Daily Itinerary Layout -->
+    <div class="row g-4">
+        <!-- Main Calendar Grid -->
+        <div class="col-12 col-xl-8">
+            <div class="card h-100">
+                <div class="card-body p-3">
+                    <div class="ga-calendar-weekdays mb-2">
+                        <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                    </div>
+                    <div id="fullCalendarGrid" class="ga-calendar-grid">
+                        <div class="text-center py-5 text-muted col-span-7">
+                            <span class="spinner-border spinner-border-sm me-2"></span> Loading schedule calendar...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Selected Date Daily Itinerary -->
+        <div class="col-12 col-xl-4">
+            <div class="card h-100">
+                <div class="card-header bg-transparent py-3 border-bottom px-4 d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="section-icon"><i class="bi bi-card-checklist"></i></span>
+                        <div>
+                            <h6 class="fw-semibold text-dark mb-0">Daily Itinerary</h6>
+                            <span class="text-muted small" id="selectedDateLabel">Select a day on the calendar</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-3" id="dailyItineraryContainer" style="max-height: 520px; overflow-y: auto;">
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-calendar-event fs-3 d-block mb-2"></i>
+                        Click any date on the calendar to view scheduled dispatches.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/ScheduleCalendar.js" asp-append-version="true"></script>
+}
+
+
+

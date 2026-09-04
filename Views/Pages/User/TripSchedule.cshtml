@@ -1,67 +1,68 @@
-﻿@using ShuttlOps.DTOs
+@using ShuttlOps.DTOs
 @model IEnumerable<ShuttlOps.Models.TripTicket>
 @{
     ViewData["Title"] = "Trip Schedule";
 }
 
 <div class="d-flex flex-column gap-4">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-sm-center flex-column flex-sm-row gap-3">
+    <div class="portal-page-header d-flex justify-content-between align-items-sm-end flex-column flex-sm-row gap-3 mb-0">
         <div>
-            <h1 class="h3 fw-bold mb-1">Trip Schedule</h1>
-            <p class="text-muted mb-0">Monitor scheduled shuttle trips, passenger assignments, and dispatch status.</p>
+            <div class="eyebrow mb-1">Transportation operations</div>
+            <h1 class="fw-bold mb-1">Trip schedule</h1>
+            <p class="mb-0">Review trips by their current approval or dispatch remark.</p>
         </div>
-        <div>
-            <a asp-controller="User" asp-action="CreateTicketPage" class="btn btn-primary px-4 shadow-sm">
-                <i class="bi bi-plus-lg me-2"></i> New Trip Request
-            </a>
-        </div>
-    </div>
-    <div class="card mb-3 border-0 shadow-sm">
-        <div class="card-body py-2">
-            <div class="row align-items-center">
-                <div class="col-auto">
-                    <label for="statusFilter" class="col-form-label fw-bold text-muted me-2">
-                        <i class="bi bi-funnel me-1"></i> Filter Status:
-                    </label>
-                </div>
-                <div class="col-auto">
-                    <select id="statusFilter" class="form-select form-select-sm shadow-none" style="min-width: 160px;">
-                        <option value="">All Statuses</option>
-                        <option value="Pending Section Head">Pending Section Head</option>
-                        <option value="Pending GA Approve">Pending GA Approve</option>
-                        <option value="GA Approved">Approved</option>
-                        <option value="Request for cancellation">Request for Cancellation</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-        <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-                <h5 class="card-title fw-bold text-primary mb-0"><i class="bi bi-list-task me-2"></i>Trip Directory</h5>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive m-3">
-                    <partial name="~/Views/Shared/Partials/Table/_GenericTablePartial.cshtml" 
-                        model='new ReusableTableDTO {
-                            TableHeaders = new List<string> { "Ticket Number", "Requestor" , "Department", "Status", "Date Of Trip" , "Departure Time", "Pickup Location", "Dropoff Location", "Passenger", "Purpose", "Action"},
-                            TableId  = "TripScheduleTable"
-                        }'/>
-                </div>
-            </div>
-        </div>
+        <a asp-controller="User" asp-action="CreateTicketPage" class="btn btn-primary px-4">
+            <i class="bi bi-plus-lg me-2"></i>New trip request
+        </a>
     </div>
 
-    
+    <section class="card schedule-tabs-card">
+        <div class="card-header p-0">
+            <nav class="schedule-tabs" aria-label="Trip schedule status">
+                <div class="nav nav-tabs flex-nowrap overflow-auto" id="scheduleStatusTabs" role="tablist">
+                    <button class="nav-link active" id="all-trips-tab" data-bs-toggle="tab" data-bs-target="#trip-directory-panel" data-status="" type="button" role="tab" aria-controls="trip-directory-panel" aria-selected="true"><i class="bi bi-grid-3x3-gap me-2"></i>All trips</button>
+                    <button class="nav-link" id="section-approval-tab" data-bs-toggle="tab" data-bs-target="#trip-directory-panel" data-status="Pending Section Head" type="button" role="tab" aria-controls="trip-directory-panel" aria-selected="false"><i class="bi bi-person-check me-2"></i>Section approval</button>
+                    <button class="nav-link" id="ga-approval-tab" data-bs-toggle="tab" data-bs-target="#trip-directory-panel" data-status="Pending GA Approve" type="button" role="tab" aria-controls="trip-directory-panel" aria-selected="false"><i class="bi bi-shield-check me-2"></i>GA approval</button>
+                    <button class="nav-link" id="approved-trips-tab" data-bs-toggle="tab" data-bs-target="#trip-directory-panel" data-status="GA Approved" type="button" role="tab" aria-controls="trip-directory-panel" aria-selected="false"><i class="bi bi-check-circle me-2"></i>Approved & dispatch</button>
+                    <button class="nav-link" id="complete-trips-tab" data-bs-toggle="tab" data-bs-target="#trip-directory-panel" data-status="Ready for dispatch" type="button" role="tab" aria-controls="trip-directory-panel" aria-selected="false"><i class="bi bi-geo-alt-fill me-2"></i>Ready to dispatch</button>
+                    <button class="nav-link" id="intransit-trips-tab" data-bs-toggle="tab" data-bs-target="#trip-directory-panel" data-status="In Transit" type="button" role="tab" aria-controls="trip-directory-panel" aria-selected="false"><i class="bi bi-geo-alt-fill me-2"></i>In Transit</button>
+                    <button class="nav-link" id="completed-trips-tab" data-bs-toggle="tab" data-bs-target="#trip-directory-panel" data-status="Completed" type="button" role="tab" aria-controls="trip-directory-panel" aria-selected="false"><i class="bi bi-geo-alt-fill me-2"></i>Completed</button>
+                    <button class="nav-link" id="cancellation-trips-tab" data-bs-toggle="tab" data-bs-target="#trip-directory-panel" data-status="Request for cancellation" type="button" role="tab" aria-controls="trip-directory-panel" aria-selected="false"><i class="bi bi-x-circle me-2"></i>For Cancellation</button>
+                     
+                </div>
+            </nav>
+        </div>
+        <div class="tab-content" id="scheduleStatusTabContent">
+            <div class="tab-pane fade show active" id="trip-directory-panel" role="tabpanel" aria-labelledby="all-trips-tab" tabindex="0">
+                <div class="card-body p-0">
+                    <div class="d-flex justify-content-between align-items-center px-4 pt-4 pb-2 gap-3 flex-wrap">
+                        <div>
+                            <h2 class="card-title fw-bold mb-0">Trip directory</h2>
+                            <span class="text-muted small" id="activeTripTabDescription">All submitted and scheduled trips</span>
+                        </div>
+                        <span class="badge bg-light text-muted border px-3 py-2"><i class="bi bi-funnel me-1"></i>Filtered by remark</span>
+                    </div>
+                    <div class="table-responsive m-3 mt-2">
+                        <partial name="~/Views/Shared/Partials/Table/_GenericTablePartial.cshtml"
+                                 model='new ReusableTableDTO {
+                                     TableHeaders = new List<string> { "Ticket Number", "Requestor", "Department", "Status", "Date Of Trip", "Departure Time", "Pickup Location", "Dropoff Location", "Passenger", "Purpose", "Action"},
+                                     TableId = "TripScheduleTable"
+                                 }' />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <partial name="~/Views/Shared/Partials/Modal/_GenericModal.cshtml"
-            model= 'new ReusableModalDTO {
-                   ModalId = "AssignDriverModal",
-                   ModalTitle = "Assign Driver",
-                   ModalIcon = "bi-car-front-fill",
-                   FormId = "AssignDriverForm",
-                   SubmitButtonText = "Assign",
-                   BodyPartialName = "~/Views/Shared/Partials/Forms/_DispatchForm.cshtml"
-        }'/>
+             model='new ReusableModalDTO {
+                    ModalId = "AssignDriverModal",
+                    ModalTitle = "Dispatch Details",
+                    ModalIcon = "bi-car-front-fill",
+                    FormId = "AssignDriverForm",
+                    SubmitButtonText = "Assign",
+                    BodyPartialName = "~/Views/Shared/Partials/Forms/_DispatchForm.cshtml"
+         }' />
 </div>
 
 @section Scripts {

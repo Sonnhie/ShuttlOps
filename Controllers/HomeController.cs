@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ShuttlOps.Models;
@@ -17,15 +18,17 @@ namespace ShuttlOps.Controllers
         [Authorize]
         public IActionResult Index()
         {
-            if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
+
+            return role switch
             {
-                return RedirectToAction("Index", "Admin");
-            }
-
-            return View();
+                "Admin" => RedirectToAction("Index", "Admin"),
+                "GA" => RedirectToAction("Index", "GA"),
+                "Security" => RedirectToAction("SecurityLogs", "User"),
+                "Requestor" or "Section Approver" => RedirectToAction("Index", "User"),
+                _ => RedirectToAction("Index", "User")
+            };
         }
-
-
 
         public IActionResult Privacy()
         {

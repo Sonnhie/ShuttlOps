@@ -1,4 +1,4 @@
-﻿@{
+@{
     // Extract all roles from the current user's claims
     var roles = User.Claims
         .Where(c => c.Type == System.Security.Claims.ClaimTypes.Role)
@@ -64,7 +64,34 @@
                         <h1 class="fw-semibold text-dark fs-6 mb-0 text-truncate">@ViewData["Title"]</h1>
                     </div>
 
-                    <div class="ms-auto d-flex align-items-center">
+                    <div class="ms-auto d-flex align-items-center gap-2">
+                        <!-- Real-time Notification Bell -->
+                        <div class="dropdown" id="notifDropdown">
+                            <button class="btn btn-light position-relative rounded-circle d-flex align-items-center justify-content-center p-2 border-0 bg-transparent text-dark" 
+                                    id="notifDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false" title="Notifications" style="width: 38px; height: 38px;">
+                                <i class="bi bi-bell fs-5"></i>
+                                <span id="notifBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" style="font-size: 0.65rem;">
+                                    0
+                                </span>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end border shadow-lg mt-2 p-0 rounded-3" style="width: 340px; max-height: 480px; overflow-y: auto;" aria-labelledby="notifDropdownBtn">
+                                <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light rounded-top-3">
+                                    <div class="fw-bold small text-dark d-flex align-items-center">
+                                        <i class="bi bi-bell-fill text-primary me-2"></i>Notifications
+                                    </div>
+                                    <button type="button" class="btn btn-link p-0 text-decoration-none small text-muted" id="btnClearAllNotifs">
+                                        Clear all
+                                    </button>
+                                </div>
+                                <div id="notifDropdownList" class="d-flex flex-column">
+                                    <div class="p-4 text-center text-muted small">
+                                        <i class="bi bi-bell-slash fs-4 d-block mb-2 text-muted"></i>
+                                        No new notifications
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="dropdown">
                             <button class="btn topbar-user d-flex align-items-center gap-2 border-0 bg-transparent px-2 py-1" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                                 <span class="user-avatar d-flex align-items-center justify-content-center fw-bold">
@@ -109,14 +136,16 @@
     <script src="~/lib/toastr/toastr.min.js"></script>
     <script src="~/lib/datatables/datatables.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <script src="~/js/notifications.js" asp-append-version="true"></script>
     <script src="~/js/logout.js"></script>
     <script src="~/js/common.js"></script>
     
     
-    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.5/js/dataTables.buttons.min.js"></script>
     <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
 
-    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.5/js/buttons.html5.min.js"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 
@@ -151,3 +180,5 @@
     </script>
 </body>
 </html>
+
+

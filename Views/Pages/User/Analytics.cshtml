@@ -1,0 +1,172 @@
+@using ShuttlOps.DTOs
+@{
+    ViewData["Title"] = "Operations Analytics";
+}
+
+<div class="d-flex flex-column gap-4 mb-4">
+    <!-- Header -->
+    <div class="portal-page-header d-flex justify-content-between align-items-sm-end flex-column flex-sm-row gap-3">
+        <div>
+            <div class="eyebrow mb-1">Reporting & Analytics</div>
+            <h1 class="fw-bold mb-1">Operations Analytics</h1>
+            <p class="mb-0 text-muted">Comprehensive operational metrics, trip distribution, and fleet utilization insights.</p>
+        </div>
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+            <div class="input-group input-group-sm" style="max-width: 220px;">
+                <span class="input-group-text bg-white"><i class="bi bi-calendar3"></i></span>
+                <select id="analyticsTimePeriod" class="form-select form-select-sm shadow-none">
+                    <option value="all">All Time</option>
+                    <option value="today">Today</option>
+                    <option value="week">This Week</option>
+                    <option value="month" selected>This Month</option>
+                    <option value="year">This Year</option>
+                </select>
+            </div>
+            <a asp-controller="User" asp-action="Reports" class="btn btn-sm btn-outline-primary fw-medium px-3">
+                <i class="bi bi-file-earmark-bar-graph me-1"></i> View Reports
+            </a>
+        </div>
+    </div>
+
+    <!-- Executive KPI Metric Cards -->
+    <div class="row g-3">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card p-3 d-flex flex-row align-items-center gap-3">
+                <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center text-primary" style="width: 48px; height: 48px;">
+                    <i class="bi bi-ticket-perforated fs-5"></i>
+                </div>
+                <div>
+                    <div class="text-muted text-uppercase fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Total Trip Requests</div>
+                    <div class="fs-4 fw-bold text-dark" id="statTotalTrips">—</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card p-3 d-flex flex-row align-items-center gap-3">
+                <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center text-success" style="width: 48px; height: 48px;">
+                    <i class="bi bi-check-circle fs-5"></i>
+                </div>
+                <div>
+                    <div class="text-muted text-uppercase fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Ready & Dispatched</div>
+                    <div class="fs-4 fw-bold text-dark" id="statDispatchedTrips">—</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card p-3 d-flex flex-row align-items-center gap-3">
+                <div class="rounded-circle bg-info bg-opacity-10 d-flex align-items-center justify-content-center text-info" style="width: 48px; height: 48px;">
+                    <i class="bi bi-people fs-5"></i>
+                </div>
+                <div>
+                    <div class="text-muted text-uppercase fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Passengers Moved</div>
+                    <div class="fs-4 fw-bold text-dark" id="statTotalPassengers">—</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card p-3 d-flex flex-row align-items-center gap-3">
+                <div class="rounded-circle bg-warning bg-opacity-10 d-flex align-items-center justify-content-center text-warning" style="width: 48px; height: 48px;">
+                    <i class="bi bi-speedometer2 fs-5"></i>
+                </div>
+                <div>
+                    <div class="text-muted text-uppercase fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Fleet Utilization</div>
+                    <div class="fs-4 fw-bold text-dark" id="statFleetUtilization">—</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts & Breakdowns Row -->
+    <div class="row g-4">
+        <!-- Left: Department Trip Breakdown -->
+        <div class="col-12 col-lg-7">
+            <div class="card h-100">
+                <div class="card-header bg-transparent py-3 border-bottom px-4 d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="section-icon"><i class="bi bi-diagram-3"></i></span>
+                        <div>
+                            <h6 class="fw-semibold text-dark mb-0">Department Trip Demand</h6>
+                            <span class="text-muted small">Reservation volume distributed across departments</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4" id="deptBreakdownContainer">
+                    <div class="text-center py-5 text-muted">
+                        <span class="spinner-border spinner-border-sm me-2"></span> Loading department analytics...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Status Distribution -->
+        <div class="col-12 col-lg-5">
+            <div class="card h-100">
+                <div class="card-header bg-transparent py-3 border-bottom px-4 d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="section-icon"><i class="bi bi-pie-chart"></i></span>
+                        <div>
+                            <h6 class="fw-semibold text-dark mb-0">Approval & Workflow Status</h6>
+                            <span class="text-muted small">Current status lifecycle of all trips</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4" id="statusDistributionContainer">
+                    <div class="text-center py-5 text-muted">
+                        <span class="spinner-border spinner-border-sm me-2"></span> Loading workflow status...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Secondary Row: Peak Hours & Fleet Availability -->
+    <div class="row g-4">
+        <!-- Peak Departure Hours -->
+        <div class="col-12 col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-transparent py-3 border-bottom px-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="section-icon"><i class="bi bi-clock-history"></i></span>
+                        <div>
+                            <h6 class="fw-semibold text-dark mb-0">Peak Departure Windows</h6>
+                            <span class="text-muted small">Most requested travel time slots throughout the day</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4" id="peakHoursContainer">
+                    <div class="text-center py-5 text-muted">
+                        <span class="spinner-border spinner-border-sm me-2"></span> Loading schedule patterns...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fleet & Driver Operational Health -->
+        <div class="col-12 col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-transparent py-3 border-bottom px-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="section-icon"><i class="bi bi-bus-front"></i></span>
+                        <div>
+                            <h6 class="fw-semibold text-dark mb-0">Fleet & Driver Readiness</h6>
+                            <span class="text-muted small">Current operational status of transportation assets</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4" id="fleetHealthContainer">
+                    <div class="text-center py-5 text-muted">
+                        <span class="spinner-border spinner-border-sm me-2"></span> Loading fleet metrics...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/Analytics.js" asp-append-version="true"></script>
+}
+

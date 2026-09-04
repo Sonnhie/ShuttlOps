@@ -1,6 +1,7 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using ShuttlOps.Models.Temp;
+using System;
 using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
 
 namespace ShuttlOps.Models;
 
@@ -39,6 +40,8 @@ public partial class ShuttlOpsDbContext : DbContext
 
     public virtual DbSet<Vehicle> Vehicles { get; set; }
 
+    public virtual DbSet<Notification> Notifications { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Department>(entity =>
@@ -51,6 +54,18 @@ public partial class ShuttlOpsDbContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("department_name");
             entity.Property(e => e.ManagerId).HasColumnName("manager_id");
+        });
+
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.Property(e => e.Category).HasMaxLength(50);
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Message).HasMaxLength(500);
+            entity.Property(e => e.TicketNumber).HasMaxLength(20);
+            entity.Property(e => e.Title).HasMaxLength(100);
+            entity.Property(e => e.Url).HasMaxLength(255);
         });
 
         modelBuilder.Entity<DispatchDetail>(entity =>
@@ -175,7 +190,7 @@ public partial class ShuttlOpsDbContext : DbContext
             entity.HasIndex(e => e.TicketId, "UQ__Security__712CC6061AB87C72").IsUnique();
 
             entity.Property(e => e.GuardSignatureName).HasMaxLength(100);
-
+            entity.Property(e => e.Remarks).HasMaxLength(255);
             entity.HasOne(d => d.Ticket).WithOne(p => p.SecurityLog)
                 .HasForeignKey<SecurityLog>(d => d.TicketId)
                 .HasConstraintName("FK_SecurityLogs_TripTickets");

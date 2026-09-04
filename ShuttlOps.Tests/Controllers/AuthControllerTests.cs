@@ -2,10 +2,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using ShuttlOps.Controllers;
-using ShuttlOps.Services;
+using ShuttlOps.Services.Interfaces;
 using ShuttlOps.ViewModel.Auth;
 using System.Security.Claims;
 using System.Text.Json;
+using Xunit;
 
 namespace ShuttlOps.Tests.Controllers;
 
@@ -36,8 +37,8 @@ public class AuthControllerTests
     [Fact]
     public async Task LoggedIn_WhenAdminAuthenticates_ReturnsAdminRedirect()
     {
-        controller.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimTypes.Role, "Admin")], "Test"));
-        authenticationService.Setup(s => s.AuthenticateUser("admin1", "Password01")).ReturnsAsync((true, "Authentication Successfull."));
+        authenticationService.Setup(s => s.AuthenticateUser("admin1", "Password01"))
+            .ReturnsAsync((true, "Authentication Successfull.", "Admin"));
 
         var result = await controller.LoggedIn(new LoginViewModel { UsernameInput = "admin1", PasswordInput = "Password01" });
 
@@ -45,6 +46,50 @@ public class AuthControllerTests
         using var document = JsonDocument.Parse(JsonSerializer.Serialize(json.Value));
         Assert.True(document.RootElement.GetProperty("success").GetBoolean());
         Assert.Equal("/Admin/Index", document.RootElement.GetProperty("redirectUrl").GetString());
+    }
+
+    [Fact]
+    public async Task LoggedIn_WhenGAAuthenticates_ReturnsGARedirect()
+    {
+        authenticationService.Setup(s => s.AuthenticateUser("ga1", "Password01"))
+            .ReturnsAsync((true, "Authentication Successfull.", "GA"));
+
+        var result = await controller.LoggedIn(new LoginViewModel { UsernameInput = "ga1", PasswordInput = "Password01" });
+
+        var json = Assert.IsType<JsonResult>(result);
+        using var document = JsonDocument.Parse(JsonSerializer.Serialize(json.Value));
+        Assert.True(document.RootElement.GetProperty("success").GetBoolean());
+        Assert.Equal("/GA/Index", document.RootElement.GetProperty("redirectUrl").GetString());
+    }
+
+    [Fact]
+    public async Task LoggedIn_WhenSecurityAuthenticates_ReturnsSecurityLogsRedirect()
+    {
+        authenticationService.Setup(s => s.AuthenticateUser("sec1", "Password01"))
+            .ReturnsAsync((true, "Authentication Successfull.", "Security"));
+
+        var result = await controller.LoggedIn(new LoginViewModel { UsernameInput = "sec1", PasswordInput = "Password01" });
+
+        var json = Assert.IsType<JsonResult>(result);
+        using var document = JsonDocument.Parse(JsonSerializer.Serialize(json.Value));
+        Assert.True(document.RootElement.GetProperty("success").GetBoolean());
+        Assert.Equal("/User/SecurityLogs", document.RootElement.GetProperty("redirectUrl").GetString());
+    }
+
+    [Theory]
+    [InlineData("Requestor", "/User/Index")]
+    [InlineData("Section Approver", "/User/Index")]
+    public async Task LoggedIn_WhenRequestorOrApproverAuthenticates_ReturnsUserIndexRedirect(string role, string expectedUrl)
+    {
+        authenticationService.Setup(s => s.AuthenticateUser("user1", "Password01"))
+            .ReturnsAsync((true, "Authentication Successfull.", role));
+
+        var result = await controller.LoggedIn(new LoginViewModel { UsernameInput = "user1", PasswordInput = "Password01" });
+
+        var json = Assert.IsType<JsonResult>(result);
+        using var document = JsonDocument.Parse(JsonSerializer.Serialize(json.Value));
+        Assert.True(document.RootElement.GetProperty("success").GetBoolean());
+        Assert.Equal(expectedUrl, document.RootElement.GetProperty("redirectUrl").GetString());
     }
 
     [Fact]

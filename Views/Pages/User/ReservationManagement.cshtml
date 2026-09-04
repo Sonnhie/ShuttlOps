@@ -1,0 +1,85 @@
+@using ShuttlOps.DTOs
+@{
+    ViewData["Title"] = "Reservation Management";
+}
+
+<div class="d-flex flex-column gap-4 mb-4">
+    <!-- Header -->
+    <div class="portal-page-header d-flex justify-content-between align-items-sm-end flex-column flex-sm-row gap-3">
+        <div>
+            <div class="eyebrow mb-1">Reservation Management</div>
+            <h1 class="fw-bold mb-1">Reservation Management</h1>
+            <p class="mb-0 text-muted">Centralized shuttle reservation hub: manage requests, section approvals, and dispatch scheduling.</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a asp-controller="User" asp-action="ScheduleCalendar" class="btn btn-light border px-3">
+                <i class="bi bi-calendar-week me-1"></i> Schedule Calendar
+            </a>
+            <a asp-controller="User" asp-action="CreateTicketPage" class="btn btn-primary px-3">
+                <i class="bi bi-plus-lg me-1"></i> Create Trip Ticket
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Workflow Tabs / Directory -->
+    <section class="card schedule-tabs-card">
+        <div class="card-header p-0">
+            <nav class="schedule-tabs" aria-label="Trip schedule status">
+                <div class="nav nav-tabs flex-nowrap overflow-auto" id="scheduleStatusTabs" role="tablist">
+                    <button class="nav-link active" id="all-trips-tab" data-bs-toggle="tab" data-bs-target="#trip-directory-panel" data-status="" type="button" role="tab" aria-selected="true">
+                        <i class="bi bi-grid-3x3-gap me-2"></i>All Reservations
+                    </button>
+                    <button class="nav-link" id="section-approval-tab" data-bs-toggle="tab" data-bs-target="#trip-directory-panel" data-status="Pending Section Head" type="button" role="tab" aria-selected="false">
+                        <i class="bi bi-person-check me-2"></i>Section Approval
+                    </button>
+                    <button class="nav-link" id="ga-approval-tab" data-bs-toggle="tab" data-bs-target="#trip-directory-panel" data-status="Pending GA Approve" type="button" role="tab" aria-selected="false">
+                        <i class="bi bi-shield-check me-2"></i>GA Approval
+                    </button>
+                    <button class="nav-link" id="ready-trips-tab" data-bs-toggle="tab" data-bs-target="#trip-directory-panel" data-status="Ready for Dispatch" type="button" role="tab" aria-selected="false">
+                        <i class="bi bi-geo-alt-fill me-2"></i>Ready to Dispatch
+                    </button>
+                    <button class="nav-link" id="approved-trips-tab" data-bs-toggle="tab" data-bs-target="#trip-directory-panel" data-status="GA Approved" type="button" role="tab" aria-selected="false">
+                        <i class="bi bi-check-circle me-2"></i>Approved
+                    </button>
+                </div>
+            </nav>
+        </div>
+
+        <div class="tab-content" id="scheduleStatusTabContent">
+            <div class="tab-pane fade show active" id="trip-directory-panel" role="tabpanel" tabindex="0">
+                <div class="card-body p-0">
+                    <div class="d-flex justify-content-between align-items-center px-4 pt-4 pb-2 gap-3 flex-wrap">
+                        <div>
+                            <h2 class="card-title fw-bold mb-0">Reservation Directory</h2>
+                            <span class="text-muted small" id="activeTripTabDescription">All submitted and scheduled shuttle reservations</span>
+                        </div>
+                    </div>
+                    <div class="table-responsive m-3 mt-2">
+                        <partial name="~/Views/Shared/Partials/Table/_GenericTablePartial.cshtml"
+                                 model='new ReusableTableDTO {
+                                     TableHeaders = new List<string> { "Ticket Number", "Requestor", "Department", "Status", "Date Of Trip", "Departure Time", "Pickup Location", "Dropoff Location", "Passenger", "Purpose", "Action"},
+                                     TableId = "TripScheduleTable"
+                                 }' />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <partial name="~/Views/Shared/Partials/Modal/_GenericModal.cshtml"
+             model='new ReusableModalDTO {
+                    ModalId = "AssignDriverModal",
+                    ModalTitle = "Dispatch Details",
+                    ModalIcon = "bi-car-front-fill",
+                    FormId = "AssignDriverForm",
+                    SubmitButtonText = "Assign",
+                    BodyPartialName = "~/Views/Shared/Partials/Forms/_DispatchForm.cshtml"
+         }' />
+</div>
+
+@section Scripts {
+    <script src="~/js/TripSchedule.js" asp-append-version="true"></script>
+}
+
+
+

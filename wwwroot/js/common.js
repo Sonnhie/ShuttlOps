@@ -41,7 +41,7 @@ const createDataTable = (tableId, options = {}) => {
         ],
         ajax: typeof options.url === 'string' ? {
             url: options.url,
-            dataSrc: (json) => json.data || [],
+            dataSrc: (json) => Array.isArray(json) ? json : (json.data || []),
             error: (xhr) => {
                 let errorMessage = "An unknown error occurred.";
                 if (xhr.responseText) {
@@ -256,21 +256,64 @@ const TableColumnsConfig = {
         return {
             data: field,
             render: function (data) {
-                if (data === 'Pending Section') {
-                    return `<span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2 py-1">Pending Section</span>`;
+                if (!data) return `<span class="badge bg-secondary-subtle text-secondary px-2 py-1">N/A</span>`;
+
+                // Map statuses directly to Bootstrap color schemes & human-readable labels
+                const statusMap = {
+                    'Pending Section': { color: 'warning', label: 'Pending Section' },
+                    'Pending GA Approve': { color: 'info', label: 'Pending GA Approve' },
+                    'GA Approved': { color: 'success', label: 'GA Approved' },
+                    'Ready for Dispatch': { color: 'warning', label: 'Ready for Dispatch' }, // Distinct primary blue
+                    'Rejected': { color: 'danger', label: 'Rejected' },
+                    'Completed': { color: 'success', label: 'Completed' },
+                    'In Transit': { color: 'primary', label: 'In Transit' }
+                };
+
+                const config = statusMap[data] || { color: 'secondary', label: data };
+
+                return `
+                    <span class="badge bg-${config.color} bg-opacity-10 text-${config.color} border border-${config.color} border-opacity-25 px-2 py-1">
+                        ${config.label}
+                    </span>
+                `;
+            }
+        }
+    },
+    VehicleStatus: (field) => {
+        return {
+            data: field,
+            render: function (data) {
+                if (data === 'Available') {
+                    return `<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">Available</span>`;
                 }
-                else if (data === 'Pending GA Approve') {
-                    return `<span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2 py-1">Pending GA Approve</span>`;
+                else if (data === 'In Transit') {
+                    return `<span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2 py-1">In Transit</span>`;
                 }
-                else if (data === 'GA Approved') {
-                    return `<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">GA Approved</span>`;
+                else if (data === 'Assigned') {
+                    return `<span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2 py-1">Assigned</span>`;
                 }
-                else if (data === 'Rejected') {
-                    return `<span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1">Rejected</span>`;
+                else if (data === 'Under Maintenance') {
+                    return `<span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1">Under Maintenance</span>`;
+                }
+                else if (data === 'Decommissioned') {
+                    return `<span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1">Decommissioned</span>`;
                 }
                 return `<span class="badge bg-secondary px-2 py-1">${data}</span>`;
             }
         }
+    },
+    DriverStatus: (field) => {
+        return {
+            data: field,
+            render: function (data) {
+                const status = String(data || 'Not specified');
+                const isActive = status.toLowerCase() === 'active' || status.toLowerCase() === 'available';
+                const badgeClass = isActive
+                    ? 'bg-success bg-opacity-10 text-success border border-success border-opacity-25'
+                    : 'bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25';
+                return `<span class="badge ${badgeClass} px-2 py-1">${status}</span>`;
+            }
+        };
     },
     Actions: (renderFunction) => {
         return {

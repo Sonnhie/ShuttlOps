@@ -1,14 +1,15 @@
-﻿using Azure.Core;
+using Azure.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ShuttlOps.DTOs;
-using ShuttlOps.Services;
+using ShuttlOps.Services.Interfaces;
 
 namespace ShuttlOps.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,GA")]
     public class AdminController(IAdminservice adminservice) : Controller
     {
+        [Authorize(Roles = "Admin")]
         public IActionResult Index()
         {
             return View("~/Views/Pages/Admin/Index.cshtml");
@@ -19,16 +20,19 @@ namespace ShuttlOps.Controllers
             return View("~/Views/Pages/Admin/Users.cshtml");
         }
 
+        [Authorize(Roles = "Admin")]
         public IActionResult Groups()
         {
             return View("~/Views/Pages/Admin/Groups.cshtml");
         }
 
+        [Authorize(Roles = "Admin")]
         public IActionResult Modules()
         {
             return View("~/Views/Pages/Admin/Modules.cshtml");
         }
 
+        [Authorize(Roles = "Admin")]
         public IActionResult Access()
         {
             return View("~/Views/Pages/Admin/Access.cshtml");
@@ -71,69 +75,36 @@ namespace ShuttlOps.Controllers
         public async Task<IActionResult> CreateUser([FromBody] UserDto userDto)
         {
             var (isSuccess, message) = await adminservice.CreateUser(userDto);
-            if (isSuccess)
+            return new JsonResult(new
             {
-                return new JsonResult(new
-                {
-                    success = true,
-                    message = message
-                });
-            }
-            else
-            {
-                return new JsonResult(new
-                {
-                    success = false,
-                    message = message
-                });
-            }
+                success = isSuccess,
+                message = message
+            });
         }
 
         [HttpPost]
         public async Task<IActionResult> DeleteUser(int id)
         {
             var (isSuccess, message) = await adminservice.DeleteUser(id);
-            if (isSuccess)
+            return new JsonResult(new
             {
-                return new JsonResult(new
-                {
-                    success = true,
-                    message = message
-                });
-            }
-            else
-            {
-                return new JsonResult(new
-                {
-                    success = false,
-                    message = message
-                });
-            }
+                success = isSuccess,
+                message = message
+            });
         }
-
 
         [HttpPost]
         public async Task<IActionResult> ResetPassword(int id)
         {
             var (isSuccess, message) = await adminservice.ResetPassword(id);
-            if (isSuccess)
+            return new JsonResult(new
             {
-                return new JsonResult(new
-                {
-                    success = true,
-                    message = message
-                });
-            }
-            else
-            {
-                return new JsonResult(new
-                {
-                    success = false,
-                    message = message
-                });
-            }
+                success = isSuccess,
+                message = message
+            });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetAllDepartments()
         {
@@ -145,50 +116,31 @@ namespace ShuttlOps.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> DeleteDepartment(int id)
         {
             var (isSuccess, message) = await adminservice.DeleteDepartment(id);
-            if (isSuccess)
+            return new JsonResult(new
             {
-                return new JsonResult(new
-                {
-                    success = true,
-                    message = message
-                });
-            }
-            else
-            {
-                return new JsonResult(new
-                {
-                    success = false,
-                    message = message
-                });
-            }
+                success = isSuccess,
+                message = message
+            });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateDepartment([FromBody] DepartmentDTO departmentDto)
         {
             var (isSuccess, message) = await adminservice.CreateDepartment(departmentDto);
-            if (isSuccess)
+            return new JsonResult(new
             {
-                return new JsonResult(new
-                {
-                    success = true,
-                    message = message
-                });
-            }
-            else
-            {
-                return new JsonResult(new
-                {
-                    success = false,
-                    message = message
-                });
-            }
+                success = isSuccess,
+                message = message
+            });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetModules()
         {
@@ -200,6 +152,7 @@ namespace ShuttlOps.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetModulesSelection()
         {
@@ -211,51 +164,31 @@ namespace ShuttlOps.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> UpdateModuleStatus([FromBody] ModuleDTO moduleDTO)
         {
             var (isSuccess, message) = await adminservice.UpdateModuleStatus(moduleDTO);
-            if (isSuccess)
+            return new JsonResult(new
             {
-                return new JsonResult(new
-                {
-                    success = true,
-                    message = message
-                });
-            }
-            else
-            {
-                return new JsonResult(new
-                {
-                    success = false,
-                    message = message
-                });
-            }
+                success = isSuccess,
+                message = message
+            });
         }
 
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateModule([FromBody] ModuleDTO moduleDTO)
         {
             var (isSuccess, message) = await adminservice.CreateModule(moduleDTO);
-            if (isSuccess)
+            return new JsonResult(new
             {
-                return new JsonResult(new
-                {
-                    success = true,
-                    message = message
-                });
-            }
-            else
-            {
-                return new JsonResult(new
-                {
-                    success = false,
-                    message = message
-                });
-            }
+                success = isSuccess,
+                message = message
+            });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetPermissionList()
         {
@@ -267,49 +200,29 @@ namespace ShuttlOps.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdatePermissionAction(AccessPayloadDTO payload)
         {
             var (isSuccess, message) = await adminservice.UpdatePermission(payload);
-            if (isSuccess)
+            return new JsonResult(new
             {
-                return new JsonResult(new
-                {
-                    success = true,
-                    message = message
-                });
-            }
-            else
-            {
-                return new JsonResult(new
-                {
-                    success = false,
-                    message = message
-                });
-            }
+                success = isSuccess,
+                message = message
+            });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreatePermission([FromBody] AccessDTO payload)
         {
             var (isSuccess, message) = await adminservice.CreatePermission(payload);
-            if (isSuccess)
+            return new JsonResult(new
             {
-                return new JsonResult(new
-                {
-                    success = true,
-                    message = message
-                });
-            }
-            else
-            {
-                return new JsonResult(new
-                {
-                    success = false,
-                    message = message
-                });
-            }
+                success = isSuccess,
+                message = message
+            });
         }
     }
 }

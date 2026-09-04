@@ -6,7 +6,7 @@
 <div class="d-flex flex-column gap-4">
     <div class="portal-page-header d-flex justify-content-between align-items-sm-end flex-column flex-sm-row gap-3">
         <div>
-            <div class="eyebrow mb-1">Administration</div>
+            <div class="eyebrow mb-1">@(User.IsInRole("Admin") ? "Administration" : "General Affairs")</div>
             <h1 class="fw-bold mb-1">User management</h1>
             <p class="mb-0">Manage user identities, organizational assignment, and role access.</p>
         </div>
@@ -50,3 +50,4 @@
 @section Scripts {
     <script src="~/js/User.js"></script>
 }
+

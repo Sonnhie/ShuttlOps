@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using ShuttlOps.Hubs;
 using ShuttlOps.Models;
 using ShuttlOps.Services;
+using ShuttlOps.Services.MainServices;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -25,12 +27,11 @@ builder.Services.AddDbContext<ShuttlOpsDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddSignalR();
 builder.Services.AddMyAppServices();
+//builder.Services.AddHostedService<TransitResolveService>();
 builder.Services.AddControllersWithViews();
 
-
-// Add services to the container.
-builder.Services.AddControllersWithViews();
 builder.Services.AddAntiforgery(options =>
 {
     // ⚡ Tells ASP.NET Core to look for the token in HTTP Headers
@@ -43,7 +44,6 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -53,6 +53,8 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapHub<NotificationHub>("/Hubs/NotificationsHubs");
 
 app.MapControllerRoute(
     name: "default",

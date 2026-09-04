@@ -1,9 +1,10 @@
-﻿const LoadTripSchedule = () => {
-    const isSectionApprover = hasRole("Section Approver");
-    const isAdmin = hasRole("Admin");
-    const isGA = hasRole("GA");
+﻿const isSectionApprover = hasRole("Section Approver");
+const isAdmin = hasRole("Admin");
+const isGA = hasRole("GA");
+const isRequestor = hasRole("Requestor");
 
-
+const LoadTripSchedule = () => {
+    console.log(isSectionApprover);
     return createDataTable(
         "#TripScheduleTable",
         {
@@ -22,136 +23,115 @@
                 TableColumnsConfig.Passenger("Passengers"),
                 TableColumnsConfig.Text("Purpose"),
                 TableColumnsConfig.Actions(function (data, type, row) {
+                    const ticketId = row.TicketId || row.TicketNumber;
+                    const currentStatus = row.ApprovalStatus; // e.g., "Pending Section Approval", "Pending GA Approve", etc.
 
-                    const canSectionApprove = (isSectionApprover || isAdmin) && row.ApprovalStatus === 'Pending Section Head';
-                    const canGAApprove = isGA && row.ApprovalStatus === 'Pending GA Approve';
-                    const canAssign = isGA && row.ApprovalStatus === 'GA Approved';
-                    const canRequestDelete = (isSectionApprover || isAdmin) && (row.ApprovalStatus === 'Pending GA Approve' || row.ApprovalStatus === 'Pending GA Approve');
+                    // 1. Combine Role AND Status checks
+                    const canSectionApprove = isSectionApprover && currentStatus === "Pending Section Head";
+                    const canGAApprove = isGA && currentStatus === "Pending GA Approve";
+                    const canAssign = isGA && currentStatus === "GA Approved";
+                    const canDelete = (isSectionApprover || isRequestor) && currentStatus === "Pending Section Approval";
+                    const canGADelete = isGA && currentStatus === "Request for cancellation";
+
+                    let menuItems = [];
+
+                    // 2. Push valid items dynamically
+                    if (canSectionApprove) {
+                        menuItems.push(`
+                            <li>
+                                <a class="dropdown-item text-success btn-section-approve-ticket" href="#" data-id="${ticketId}" data-status="Pending GA Approve">
+                                    <i class="bi bi-check-circle text-success me-2"></i> Approve (Section)
+                                </a>
+                            </li>
+                        `);
+                    }
+
+                    if (canGAApprove) {
+                        menuItems.push(`
+                            <li>
+                                <a class="dropdown-item text-success btn-ga-approve-ticket" href="#" data-id="${ticketId}" data-status="GA Approved">
+                                    <i class="bi bi-check-circle text-success me-2"></i> Approve (GA)
+                                </a>
+                            </li>
+                        `);
+                                    }
+
+                    if (canAssign) {
+                        menuItems.push(`
+                            <li>
+                                <a class="dropdown-item text-primary btn-assign-vehicle" href="#" data-bs-toggle="modal" data-bs-target="#AssignDriverModal" data-id="${ticketId}">
+                                    <i class="bi bi-truck me-2"></i> Assign Vehicle
+                                </a>
+                            </li>
+                        `);
+                    }
+
+                    if (canDelete) {
+                        menuItems.push(`
+                            ${menuItems.length > 0 ? '<li><hr class="dropdown-divider"></li>' : ''}
+                            <li>
+                                <a class="dropdown-item text-danger btn-delete-ticket" href="#" data-id="${ticketId}">
+                                    <i class="bi bi-trash me-2"></i> Delete Request
+                                </a>
+                            </li>
+                        `);
+                    }
+
+                    if (canGADelete) {
+                        menuItems.push(`
+                            ${menuItems.length > 0 ? '<li><hr class="dropdown-divider"></li>' : ''}
+                            <li>
+                                <a class="dropdown-item text-danger btn-delete-ticket" href="#" data-id="${ticketId}">
+                                    <i class="bi bi-trash me-2"></i> Delete Request
+                                </a>
+                            </li>
+                        `);
+                    }
+
+                    // If no actions available for the current role/status, show a disabled state
+                    if (menuItems.length === 0) {
+                          return `<span class="text-muted small">No actions</span>`;
+                    }
 
                     return `
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-light border-0" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions">
-                            <i class="bi bi-three-dots-vertical"></i>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
-                            ${canSectionApprove ? `
-                            <li>
-                                <a class="dropdown-item text-success btn-section-approve-ticket" href="#" data-id="${row.TicketId || row.TicketNumber}">
-                                    <i class="bi bi-check-circle text-success me-2"></i> Approve
-                                </a>
-                            </li>
-                            ` : ''}
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                            ${canSectionApprove ? `
-                            <li>
-                                <a class="dropdown-item text-danger btn-delete-ticket" href="#" data-id="${row.TicketId || row.TicketNumber}">
-                                    <i class="bi bi-trash text-danger me-2"></i> Delete Request
-                                </a>
-                            </li>
-                            ` : ` `}
-
-
-
-                           ${canGAApprove ? `
-                           <li>
-                                <a class="dropdown-item text-success btn-ga-approve-ticket" href="#"  data-id="${row.TicketId || row.TicketNumber}">
-                                    <i class="bi bi-check-circle text-success me-2"></i> Approve
-                                </a>
-                            </li>
-                            ` : ` `}
-
-                           ${canAssign ? `
-                           <li>
-                                <a class="dropdown-item text-success btn-ga-approve-ticket" href="#" data-bs-toggle="modal" data-bs-target="#AssignDriverModal"  data-id="${row.TicketId || row.TicketNumber}">
-                                    <i class="bi bi-check-circle text-success me-2"></i> Assign Vehicle
-                                </a>
-                            </li>
-                            ` : ` `}
-
-
-                            ${canRequestDelete ? `
-                            <li>
-                                <a class="dropdown-item text-danger btn-delete-ticket" href="#" data-id="${row.TicketId || row.TicketNumber}">
-                                    <i class="bi bi-trash text-danger me-2"></i> Delete Request
-                                </a>
-                            </li>
-                            ` : ` `}
-
-                        </ul>
-                    </div>
-                `;
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-light border-0" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                ${menuItems.join('')}
+                            </ul>
+                        </div>
+                    `;
                 })
             ]
         }
     )
 }
 
-const SectionApprove = (id) => {
+const ProcessApproval = (id, status) => {
     showConfirm(
         "Confirm Submission",
-        "Are you sure you want to approve this request?",
-        "Yes, Approve it!",
+        "Are you sure you want to update status of this request?",
+        "Yes, update it!",
         "Cancel",
         () => {
             showLoading("Validating approval...");
             $.ajax({
-                url: "/Request/SectionRequestApproval",
+                url: "/Request/ProcessApproval",
                 type: "POST",
                 data: {
-                    status: "Pending GA Approve",
+                    status: status,
                     id: id
                 },
                 success: function (response) {
                     hideLoading();
                     if (response.success) {
-                        showAlertWithCallback("success", response.message || "Request approved by section head successfully!", () => {
+                        showAlertWithCallback("success", response.message || "Status updated successfully!", () => {
                             $("#TripScheduleTable").DataTable().ajax.reload();
                         });
                     } else {
-                        showAlert("error", response.message || "An error occurred while approving the request.");
-                    }
-                },
-                error: function (xhr, status, error) {
-                    let errorMessage = "An unknown error occurred.";
-                    if (xhr.responseText) {
-                        try {
-                            let response = JSON.parse(xhr.responseText);
-                            errorMessage = response.error || response.message || errorMessage;
-                        } catch (e) {
-                            console.error("Could not parse error response");
-                        }
-                    }
-                    showAlert("error", errorMessage);
-                }
-            });
-        }
-    );
-};
-
-const GAapprove = (id) => {
-    showConfirm(
-        "Confirm Submission",
-        "Are you sure you want to approve this request?",
-        "Yes, Approve it!",
-        "Cancel",
-        () => {
-            showLoading("Validating approval...");
-            $.ajax({
-                url: "/Request/GARequestApproval",
-                type: "POST",
-                data: {
-                    status: "GA Approved",
-                    id: id
-                },
-                success: function (response) {
-                    hideLoading();
-                    if (response.success) {
-                        showAlertWithCallback("success", response.message || "Request approved by GA PIC successfully!", () => {
-                            $("#TripScheduleTable").DataTable().ajax.reload();
-                        });
-                    } else {
-                        showAlert("error", response.message || "An error occurred while approving the request.");
+                        showAlert("error", response.message || "An error occurred while updating the status.");
                     }
                 },
                 error: function (xhr, status, error) {
@@ -212,56 +192,12 @@ const DeleteRequest = (id) => {
     );
 };
 
-const RequestDelete = (id) => {
-    showConfirm(
-        "Confirm Submission",
-        "Are you sure you want to request cancellation of this request?",
-        "Yes, cancel it!",
-        "Cancel",
-        () => {
-            showLoading("Deleting Request...");
-            $.ajax({
-                url: "/Request/RequestDelete",
-                type: "POST",
-                data: {
-                    status: "Request for cancellation",
-                    id: id
-                },
-                success: function (response) {
-                    hideLoading();
-                    if (response.success) {
-                        showAlertWithCallback("success", response.message || "Request cancellation by section head successfully submitted!", () => {
-                            $("#TripScheduleTable").DataTable().ajax.reload();
-                        });
-                    } else {
-                        showAlert("error", response.message || "An error occurred while requesting the cancellation.");
-                    }
-                },
-                error: function (xhr, status, error) {
-                    let errorMessage = "An unknown error occurred.";
-                    if (xhr.responseText) {
-                        try {
-                            let response = JSON.parse(xhr.responseText);
-                            errorMessage = response.error || response.message || errorMessage;
-                        } catch (e) {
-                            console.error("Could not parse error response");
-                        }
-                    }
-                    showAlert("error", errorMessage);
-                }
-            });
-        }
-    );
-};
-
-
-
 $.fn.dataTable.ext.search.push(function (settings, data, dataIndex, rowData) {
     if (settings.nTable.id !== 'TripScheduleTable') {
         return true;
     }
 
-    const selectedStatus = $('#statusFilter').val()?.toLowerCase().trim();
+    const selectedStatus = $('#scheduleStatusTabs .nav-link.active').data('status')?.toString().toLowerCase().trim();
     if (!selectedStatus) {
         return true; 
     }
@@ -293,7 +229,6 @@ const VehicleSelection = () => {
     )
 }
 
-
 const PlateNumberTxt = (vehicleid) => {
     $.ajax({
         url: "/Request/GetPlatenumber",
@@ -303,6 +238,22 @@ const PlateNumberTxt = (vehicleid) => {
         },
         success: function (res) {
             $("#plateNumber").val(res);
+        },
+        error: function (xhr, status, error) {
+            App.showAjaxError(xhr, status, error);
+        }
+    });
+}
+
+const VehicleStatus = (vehicleid) => {
+    $.ajax({
+        url: "/Request/GetVehicleStatus",
+        type: "GET",
+        data: {
+            id: vehicleid
+        },
+        success: function (res) {
+            $("#Status").val(res);
         },
         error: function (xhr, status, error) {
             App.showAjaxError(xhr, status, error);
@@ -326,50 +277,145 @@ const CapacityTxt = (vehicleid) => {
     });
 }
 
+const AssignDriver = () => {
+    const formData = {
+        TicketId: parseInt($("#ticketId").val(), 10) || 0,
+        DriverId: parseInt($("#driverId").val(), 10) || 0,
+        VehicleId: parseInt($("#vehicleId").val(), 10) || 0,
+        // Selected option text instead of ID value
+        DriverName: $('#driverSelect').val(),
+        VehicleStatus: $("#vehicleStatus").val() || $("#Status").val(),
+        Remarks: $("#Remarks").val(),
+        PlateNumber: $("#plateNumber").val(),
+        Status: "Ready for Dispatch"
+    };
 
+    return showConfirm(
+        "Confirm Submission",
+        "Are you sure you want to assign this Driver?",
+        "Yes, Assign",
+        "Cancel",
+        () => {
+            showLoading("Processing...");
 
+            $.ajax({
+                url: "/GA/AssignDriver",
+                type: "POST",
+                contentType: "application/json",
+                // Pass Anti-Forgery Token via Headers instead of the JSON body
+                headers: {
+                    "RequestVerificationToken": typeof token !== 'undefined' ? token : $('input[name="__RequestVerificationToken"]').val()
+                },
+                // Send flat DTO payload directly
+                data: JSON.stringify(formData),
+                success: function (response) {
+                    hideLoading();
 
+                    // Close the modal cleanly
+                    $('#AssignDriverModal').modal('hide');
+
+                    if (response.success) {
+                        showAlertWithCallback("success", response.message || "Successfully assigned.", () => {
+                            $("#TripScheduleTable").DataTable().ajax.reload();
+                        });
+                    } else {
+                        showAlert("error", response.message || "An error occurred while assigning driver.");
+                    }
+                },
+                error: function (xhr) {
+                    hideLoading();
+                    let errorMessage = "An unknown error occurred.";
+                    if (xhr.responseText) {
+                        try {
+                            let response = JSON.parse(xhr.responseText);
+                            errorMessage = response.error || response.message || errorMessage;
+                        } catch (e) {
+                            console.error("Could not parse error response", e);
+                        }
+                    }
+                    showAlert("error", errorMessage);
+                }
+            });
+        }
+    );
+};
 $(function () {
     const table = LoadTripSchedule();
-    $('#statusFilter').on('change', function () {
+    const tabDescriptions = {
+        '': 'All submitted and scheduled trips',
+        'Pending Section Head': 'Trips awaiting section-head approval',
+        'Pending GA Approve': 'Trips awaiting General Affairs approval',
+        'GA Approved': 'Approved trips ready for vehicle assignment or dispatch',
+        'Request for cancellation': 'Trips with an active cancellation request',
+        'Ready for dispatch': 'Trips ready for dispatch',
+        'In Transit': 'Trips that already in transit.',
+        'Completed' : 'Trips that already completed.'
+    };
+
+    $('#scheduleStatusTabs .nav-link').on('shown.bs.tab', function (event) {
+        const selectedStatus = $(event.target).data('status') || '';
+        $('#activeTripTabDescription').text(tabDescriptions[selectedStatus] || 'Filtered trip records');
         table.draw();
     });
 
-    $("#AssignDriverModal").on('show.bs.modal', function () {
+    $("#AssignDriverModal").on('show.bs.modal', function(event) {
         //console.log("clicked")
+        const button = $(event.relatedTarget);
+        const ticketId = button.data('id');
+        $(this).find('#ticketId').val(ticketId);
+       // console.log("Modal opened for Ticket ID:", ticketId);
         DriverSelection();
         VehicleSelection();
+
+        $("#AssignDriverForm").on('submit', function (e) {
+            e.preventDefault();
+            AssignDriver();
+        });
     });
 
     $('#vehicleName').on('change', function () {
         let id = $(this).val();
-        console.log(id);
+      //  console.log(id);
+        $("#vehicleId").val(id);
         PlateNumberTxt(id);
         CapacityTxt(id);
+        VehicleStatus(id);
     });
+
+    $('#driverName').on('change', function () {
+        let id = $(this).val();
+     //   console.log(id);
+        const selectedOption = $(this).find('option:selected');
+        $("#driverId").val(id);
+        $('#driverSelect').val(selectedOption.text());
+    });
+
+
 
     $(document).on('click', '.btn-section-approve-ticket', function () {
         let id = $(this).data("id");
-        console.log(id);
-        SectionApprove(id);
+      //  console.log(id);
+        ProcessApproval(id, "Pending GA Approve")
     });
 
     $(document).on('click', '.btn-delete-ticket', function () {
         let id = $(this).data("id");
-        console.log(id);
+     //   console.log(id);
         DeleteRequest(id);
     });
 
     $(document).on('click', '.btn-cancel-ticket', function () {
         let id = $(this).data("id");
-        console.log(id);
-        RequestDelete(id);
+     //   console.log(id);
+        ProcessApproval(id, "Request for cancellation")
     });
 
     $(document).on('click', '.btn-ga-approve-ticket', function () {
         let id = $(this).data("id");
-        console.log(id);
-        GAapprove(id);
+     //   console.log(id);
+        ProcessApproval(id, "GA Approved");
     });
+
+  
 
 });

@@ -2,8 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using ShuttlOps.Controllers;
 using ShuttlOps.DTOs;
-using ShuttlOps.Services;
+using ShuttlOps.Services.Interfaces;
 using System.Text.Json;
+using Xunit;
 
 namespace ShuttlOps.Tests.Controllers;
 
@@ -15,26 +16,58 @@ public class RequestControllerTests
     public RequestControllerTests() => controller = new RequestController(requestService.Object);
 
     [Fact]
-    public async Task CreateRequest_WhenServiceSucceeds_ReturnsSuccessPayload()
+    public async Task CreateRequest_WhenModelIsValidAndServiceSucceeds_ReturnsSuccessPayloadWithRedirect()
     {
-        var request = new CreateTripTicketDTO { PickupLocation = "Office", DropLocation = "Airport", Purpose = "Site visit" };
-        requestService.Setup(s => s.CreateRequest(request)).ReturnsAsync((true, "Request created successfully."));
+        var request = new CreateTripTicketDTO
+        {
+            TripDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
+            DepartureTime = new TimeOnly(8, 0),
+            ArrivalTime = new TimeOnly(9, 0),
+            PickupLocation = "Main HQ",
+            DropLocation = "Plant 2",
+            Purpose = "Inspection"
+        };
+        requestService.Setup(s => s.CreateRequest(request)).ReturnsAsync((true, "Trip ticket REQ-20260901-0001 created successfully."));
 
         var result = await controller.CreateRequest(request);
 
-        AssertJson(result, true, "Request created successfully.");
+        var json = Assert.IsType<JsonResult>(result);
+        using var document = JsonDocument.Parse(JsonSerializer.Serialize(json.Value));
+        Assert.True(document.RootElement.GetProperty("success").GetBoolean());
+        Assert.Equal("Trip ticket REQ-20260901-0001 created successfully.", document.RootElement.GetProperty("message").GetString());
+        Assert.Equal("/User/TripSchedule", document.RootElement.GetProperty("redirectUrl").GetString());
         requestService.Verify(s => s.CreateRequest(request), Times.Once);
+    }
+
+    [Fact]
+    public async Task CreateRequest_WhenModelHasErrors_ReturnsFailureWithoutCallingService()
+    {
+        controller.ModelState.AddModelError("PickupLocation", "Pickup location is required.");
+        var request = new CreateTripTicketDTO();
+
+        var result = await controller.CreateRequest(request);
+
+        AssertJson(result, false, "Pickup location is required.");
+        requestService.Verify(s => s.CreateRequest(It.IsAny<CreateTripTicketDTO>()), Times.Never);
     }
 
     [Fact]
     public async Task CreateRequest_WhenServiceFails_ReturnsFailurePayload()
     {
-        var request = new CreateTripTicketDTO();
-        requestService.Setup(s => s.CreateRequest(request)).ReturnsAsync((false, "Invalid request payload."));
+        var request = new CreateTripTicketDTO
+        {
+            TripDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
+            DepartureTime = new TimeOnly(8, 0),
+            ArrivalTime = new TimeOnly(9, 0),
+            PickupLocation = "Main HQ",
+            DropLocation = "Plant 2",
+            Purpose = "Inspection"
+        };
+        requestService.Setup(s => s.CreateRequest(request)).ReturnsAsync((false, "Estimated arrival time must be later than estimated departure time."));
 
         var result = await controller.CreateRequest(request);
 
-        AssertJson(result, false, "Invalid request payload.");
+        AssertJson(result, false, "Estimated arrival time must be later than estimated departure time.");
     }
 
     [Fact]
@@ -73,3 +106,4 @@ public class RequestControllerTests
         Assert.Equal(message, document.RootElement.GetProperty("message").GetString());
     }
 }
+

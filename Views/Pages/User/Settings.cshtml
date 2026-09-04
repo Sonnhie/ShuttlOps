@@ -1,0 +1,163 @@
+@using ShuttlOps.DTOs
+@{
+    ViewData["Title"] = "Portal Settings";
+}
+
+<div class="d-flex flex-column gap-4 mb-4">
+    <!-- Header -->
+    <div class="portal-page-header d-flex justify-content-between align-items-sm-end flex-column flex-sm-row gap-3">
+        <div>
+            <div class="eyebrow mb-1">Configuration & Preferences</div>
+            <h1 class="fw-bold mb-1">Portal Settings</h1>
+            <p class="mb-0 text-muted">Customize your workspace appearance, operational notification preferences, and account security.</p>
+        </div>
+        <button type="button" class="btn btn-primary px-4" id="btnSaveAllSettings">
+            <i class="bi bi-check2 me-1"></i> Save Preferences
+        </button>
+    </div>
+
+    <div class="row g-4">
+        <!-- Appearance Settings -->
+        <div class="col-12 col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-transparent py-3 border-bottom px-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="section-icon"><i class="bi bi-palette"></i></span>
+                        <div>
+                            <h6 class="fw-semibold text-dark mb-0">Workspace Appearance</h6>
+                            <span class="text-muted small">Control display density and color treatment</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4 d-flex flex-column gap-4">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pb-3 border-bottom">
+                        <div>
+                            <strong class="d-block text-dark">Interface Density</strong>
+                            <small class="text-muted">Adjust padding and row height across tables and cards</small>
+                        </div>
+                        <select id="userSettingDensity" class="form-select form-select-sm" style="max-width: 180px;">
+                            <option value="comfortable">Comfortable</option>
+                            <option value="compact">Compact</option>
+                        </select>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pb-3 border-bottom">
+                        <div>
+                            <strong class="d-block text-dark">Accent Palette</strong>
+                            <small class="text-muted">Primary theme tone for highlights and active tabs</small>
+                        </div>
+                        <select id="userSettingAccent" class="form-select form-select-sm" style="max-width: 180px;">
+                            <option value="blue">Enterprise Blue</option>
+                            <option value="teal">Operations Teal</option>
+                            <option value="violet">Executive Violet</option>
+                        </select>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div>
+                            <strong class="d-block text-dark">Reduced Motion</strong>
+                            <small class="text-muted">Disable transitions and animated cues for faster rendering</small>
+                        </div>
+                        <div class="form-check form-switch m-0">
+                            <input id="userSettingReducedMotion" class="form-check-input" type="checkbox" role="switch" style="transform: scale(1.2);">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notification Settings -->
+        <div class="col-12 col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-transparent py-3 border-bottom px-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="section-icon"><i class="bi bi-bell"></i></span>
+                        <div>
+                            <h6 class="fw-semibold text-dark mb-0">Notifications & Alerts</h6>
+                            <span class="text-muted small">Real-time alerts and operational reminders</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4 d-flex flex-column gap-4">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pb-3 border-bottom">
+                        <div>
+                            <strong class="d-block text-dark">Approval Status Alerts</strong>
+                            <small class="text-muted">Receive instant feedback on ticket approval and rejection events</small>
+                        </div>
+                        <div class="form-check form-switch m-0">
+                            <input id="userSettingApprovalAlerts" class="form-check-input" type="checkbox" role="switch" checked style="transform: scale(1.2);">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pb-3 border-bottom">
+                        <div>
+                            <strong class="d-block text-dark">Dispatch Schedule Reminders</strong>
+                            <small class="text-muted">Show upcoming trip countdowns in the workspace board</small>
+                        </div>
+                        <div class="form-check form-switch m-0">
+                            <input id="userSettingScheduleReminders" class="form-check-input" type="checkbox" role="switch" checked style="transform: scale(1.2);">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div>
+                            <strong class="d-block text-dark">Gate Clearance Confirmations</strong>
+                            <small class="text-muted">Notify when shuttle passes security checkpoint</small>
+                        </div>
+                        <div class="form-check form-switch m-0">
+                            <input id="userSettingSecurityAlerts" class="form-check-input" type="checkbox" role="switch" checked style="transform: scale(1.2);">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Profile & System Information -->
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-transparent py-3 border-bottom px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="section-icon"><i class="bi bi-person-badge"></i></span>
+                        <div>
+                            <h6 class="fw-semibold text-dark mb-0">Account & Security Information</h6>
+                            <span class="text-muted small">Current session details and credentials overview</span>
+                        </div>
+                    </div>
+                    <a asp-controller="User" asp-action="ChangePassword" class="btn btn-sm btn-outline-primary px-3">
+                        <i class="bi bi-key me-1"></i> Change Password
+                    </a>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-4">
+                            <div class="p-3 border rounded-3 bg-light">
+                                <span class="text-muted small text-uppercase fw-semibold d-block mb-1">Signed-in User</span>
+                                <span class="fw-bold text-dark fs-6">@(User.Identity?.Name ?? "Authenticated User")</span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="p-3 border rounded-3 bg-light">
+                                <span class="text-muted small text-uppercase fw-semibold d-block mb-1">Assigned Role</span>
+                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1 fs-6">
+                                    @(User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value ?? "Authorized")
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="p-3 border rounded-3 bg-light">
+                                <span class="text-muted small text-uppercase fw-semibold d-block mb-1">Session Security</span>
+                                <span class="text-success fw-bold"><i class="bi bi-shield-lock-fill me-1"></i> Cookie Encrypted</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/Settings.js" asp-append-version="true"></script>
+}
+
+
