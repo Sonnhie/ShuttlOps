@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using ShuttlOps.DTOs;
 using ShuttlOps.Models;
@@ -12,7 +13,9 @@ namespace ShuttlOps.Services.MainServices
     public class AdminService(
         ShuttlOpsDbContext dbContext,
         ILogger<AdminService> logger,
-        IHttpContextAccessor httpContextAccessor
+        IHttpContextAccessor httpContextAccessor,
+        IEmailService emailService,
+        IConfiguration configuration
     ) : IAdminservice
     {
         private bool IsCallerGAOnly()
@@ -70,6 +73,48 @@ namespace ShuttlOps.Services.MainServices
             {
                 logger.LogError(ex, "An error occurred while retrieving all departments.");
                 return Array.Empty<object>();
+            }
+        }
+
+        public async Task<object> GetSectionHeadId()
+        {
+            try
+            {
+                var result = await dbContext.UserTables
+                            .Where(x => x.RoleId == 3 ||  x.RoleId == 5)
+                            .Select(x => new {Id = x.Id,  Name = x.EmployeeName })
+                            .ToListAsync();
+
+                return result;
+            }catch(Exception ex)
+            {
+                logger.LogError(ex, "An error occurred while retrieving all departments.");
+                return Array.Empty<object>();
+            }
+        }
+
+        public async Task<(bool isSuccess, string message)> UpdateDeptHead(int deptid, int id)
+        {
+            try
+            {
+                if (id == 0) return (false, $"Invalid user id {id}.");
+                if (deptid == 0) return (false, $"Invalid department id {deptid}.");
+
+                var isDeptExist = await dbContext.Departments.FindAsync(deptid);
+                var isUserExist = await dbContext.UserTables.FindAsync(id);
+
+                if (isDeptExist == null) return (false, "Department not exist on database.");
+                if (isUserExist == null) return (false, $"User {id} not exist on database.");
+
+                isDeptExist.ManagerId = id;
+
+                await dbContext.SaveChangesAsync();
+                return (true, $"{isUserExist.EmployeeName} successfully assigned to {isDeptExist.DepartmentName}.");
+            }
+            catch(Exception ex)
+            {
+                logger.LogError(ex, "An error occurred while updating department.");
+                return (false, $"Error updating department: {ex.Message}");
             }
         }
 
@@ -167,12 +212,121 @@ namespace ShuttlOps.Services.MainServices
 
                 dbContext.UserTables.Add(newUser);
                 await dbContext.SaveChangesAsync();
+
+                if (!string.IsNullOrWhiteSpace(userDto.Email))
+                {
+                    try
+                    {
+                        var request = httpContextAccessor.HttpContext?.Request;
+                        var systemUrl = configuration["Email:AppBaseUrl"]
+                            ?? (request != null ? $"{request.Scheme}://{request.Host}" : "http://192.168.101.41/ShuttlOps");
+
+                        var loginUrl = $"{systemUrl}/Account/Login";
+
+                        var emailBody = $@"
+                            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;'>
+                                <h2 style='color: #0d6efd;'>Welcome to Shuttl Operation Portal!</h2>
+                                <p>Hello <strong>{userDto.EmployeeName}</strong>,</p>
+                                <p>Your ShuttlOps corporate account has been successfully created. You can now access the portal using the credentials below:</p>
+                
+                                <div style='background-color: #f8f9fa; padding: 15px; border-radius: 6px; margin: 20px 0;'>
+                                    <p style='margin: 5px 0;'><strong>Corporate ID / Username:</strong> <span style='color: #212529;'>{userDto.EmployeeID}</span></p>
+                                    <p style='margin: 5px 0;'><strong>Temporary Password:</strong> <span style='color: #d63384; font-family: monospace;'>Password01</span></p>
+                                </div>
+
+                                <div style='background-color: #fff3cd; color: #664d03; padding: 12px; border-left: 4px solid #ffc107; margin-bottom: 20px;'>
+                                    <strong>Security Notice:</strong> For your account security, you are required to change your temporary password immediately upon your first login. You can do this under <em>Settings &gt; Change Password</em>.
+                                </div>
+
+                                <p style='text-align: center; margin: 30px 0;'>
+                                    <a href='{loginUrl}' style='background-color: #0d6efd; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;'>
+                                        {loginUrl}
+                                    </a>
+                                </p>
+
+                                <hr style='border: none; border-top: 1px solid #eee; margin: 20px 0;' />
+                                <p style='font-size: 12px; color: #6c757d; text-align: center;'>
+                                    This is an automated notification. Please do not reply directly to this email.
+                                </p>
+                            </div>";
+
+                        var emailDto = new EmailDTO
+                        {
+                            Subject = "Welcome to ShuttlOps - Your Account Credentials",
+                            Body = emailBody,
+                            IsHtml = true,
+                            EmailRecipients = [userDto.Email.Trim()]
+                        };
+
+                        await emailService.SendAutoEmailNotification(emailDto);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log SMTP failures without failing the user account creation
+                        logger.LogError(ex, "User {EmployeeID} was created, but failed to send welcome email.", userDto.EmployeeID);
+                    }
+                }
+
+
                 return (true, "User created successfully.");
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "An error occurred while creating a new user.");
                 return (false, $"Error creating user: {ex.Message}");
+            }
+        }
+
+        public async Task<(bool isSuccess, string message)> UpdateUser(UserDto userDto)
+        {
+            try
+            {
+                if (userDto == null)
+                {
+                    return (false, "User data is null.");
+                }
+
+                if (string.IsNullOrWhiteSpace(userDto.EmployeeID) || string.IsNullOrWhiteSpace(userDto.EmployeeName))
+                {
+                    return (false, "Employee ID and Employee Name are required.");
+                }
+
+                int? roleId = int.TryParse(userDto.Role, out int parseRoleId) ? parseRoleId : null;
+                int departmentId = int.TryParse(userDto.Department, out int parseDeptId) ? parseDeptId : 1;
+                if (roleId == null)
+                {
+                    return (false, "Invalid role selected.");
+                }
+
+                var targetRole = await dbContext.RoleTables.FindAsync(roleId.Value);
+                if (targetRole == null)
+                {
+                    return (false, "Selected role does not exist.");
+                }
+
+                // Prevent GA from assigning Admin role
+                if (IsCallerGAOnly() && targetRole.RoleName == "Admin")
+                {
+                    return (false, "General Affairs cannot create, edit or assign Admin accounts.");
+                }
+
+
+                var IsUserExist = await dbContext.UserTables.FindAsync(userDto.Id);
+                if (IsUserExist == null) return (false, "User does not exist on the database.");
+
+                IsUserExist.UserName = userDto.EmployeeID;
+                IsUserExist.EmployeeName = userDto.EmployeeName;
+                IsUserExist.RoleId = roleId.Value;
+                IsUserExist.DepartmentId = departmentId;
+                IsUserExist.EmailAdd = userDto.Email; 
+
+
+                await dbContext.SaveChangesAsync();
+                return (true, "User account successfully updated.");
+            }catch(Exception ex)
+            {
+                logger.LogError(ex, "An Error occured while retrieving all modules.");
+                return (false, $"System Error: {ex}");
             }
         }
 

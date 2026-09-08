@@ -45,6 +45,14 @@
                  FormId = "AddUserForm", SubmitButtonText = "Create user",
                  BodyPartialName = "~/Views/Shared/Partials/Forms/_CreateUserFormPartial.cshtml"
              }' />
+
+    <partial name="~/Views/Shared/Partials/Modal/_GenericModal.cshtml"
+             model='new ReusableModalDTO{
+                ModalId = "UpdateUserModal", ModalTitle = "Update User Account", ModalIcon = "bi bi-pencil-square",
+                FormId = "UpdateUserForm", SubmitButtonText = "Save Changes",
+                BodyPartialName = "~/Views/Shared/Partials/Forms/_UpdateUserForm.cshtml"
+        }'
+    />
 </div>
 
 @section Scripts {

@@ -2,7 +2,7 @@
     return createDataTable(
         "#departmentTable",
         {
-            url: "/Admin/GetAllDepartments",
+            url: UB + "/Admin/GetAllDepartments",
             searchPlaceholder: "Search Department ID...",
             order: [[0, 'asc']],
             columns: [
@@ -18,8 +18,8 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
                             <li>
-                                <a class="dropdown-item btn-edit-department" href="#" data-id="${row.Id || row.DepartmentName}">
-                                    <i class="bi bi-pencil-square text-primary me-2"></i> Edit
+                                <a class="dropdown-item btn-assign-manager" href="#" data-bs-toggle="modal" data-bs-target="#AssignManagerModal" data-id="${row.Id || row.DepartmentName}">
+                                    <i class="bi bi-pencil-square text-primary me-2"></i> Assign Section Head
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
@@ -47,7 +47,7 @@ const CreateDepartment = (forms) => {
         () => {
             showLoading("Creating department...");
             $.ajax({
-                url: "/Admin/CreateDepartment",
+                url: UB + "/Admin/CreateDepartment",
                 type: "POST",
                 contentType: "application/json; charset=utf-8",
                 data: JSON.stringify(form),
@@ -55,7 +55,7 @@ const CreateDepartment = (forms) => {
                     hideLoading();
                     if (response.success) {
                         showAlertWithCallback("success", response.message || "Department created successfully!", () => {
-                            window.location.href = response.redirectUrl || "/Admin/Groups";
+                            window.location.href = UB + (response.redirectUrl || "/Admin/Groups");
                         });
                     } else {
                         showAlert("error", response.message || "An error occurred while creating the department.");
@@ -87,7 +87,7 @@ const DeleteDepartment = (rowid) => {
         () => {
             showLoading("Deleting department...");
             $.ajax({
-                url: "/Admin/DeleteDepartment",
+                url: UB + "/Admin/DeleteDepartment",
                 type: "POST",
                 data: {
                     id: rowid,
@@ -97,10 +97,53 @@ const DeleteDepartment = (rowid) => {
                     hideLoading();
                     if (response.success) {
                         showAlertWithCallback("success", response.message || "Department successfully!", () => {
-                            window.location.href = response.redirectUrl || "/Admin/Groups";
+                            window.location.href = UB + (response.redirectUrl || "/Admin/Groups");
                         });
                     } else {
                         showAlert("error", response.message || "An error occurred while deleting the department.");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    let errorMessage = "An unknown error occurred.";
+                    if (xhr.responseText) {
+                        try {
+                            let response = JSON.parse(xhr.responseText);
+                            errorMessage = response.error || response.message || errorMessage;
+                        } catch (e) {
+                            console.error("Could not parse error response");
+                        }
+                    }
+                    showAlert("error", errorMessage);
+                }
+            });
+        }
+    );
+}
+
+const UpdateDeptHead = (id, deptid) => {
+    showConfirm(
+        "Confirm Assign",
+        "Are you sure you want to assign this user?",
+        "Yes, Assign",
+        "Cancel",
+        () => {
+            showLoading("Updating department...");
+            $.ajax({
+                url: UB + "/Admin/UpdateDeptHead",
+                type: "POST",
+                data: {
+                    id: id,
+                    deptid: deptid,
+                    __RequestVerificationToken: token
+                },
+                success: function (response) {
+                    hideLoading();
+                    if (response.success) {
+                        showAlertWithCallback("success", response.message || "Department update successfully!", () => {
+                            window.location.href = UB + (response.redirectUrl || "/Admin/Groups");
+                        });
+                    } else {
+                        showAlert("error", response.message || "An error occurred while updating the department.");
                     }
                 },
                 error: function (xhr, status, error) {
@@ -125,10 +168,23 @@ const LoadDepartmentSelection = () => {
     createSelectOptions(
         "#departmentFilter",
         {
-            url: "/Admin/GetDepartments",
+            url: UB + "/Admin/GetDepartments",
             placeholder: "Department",
             valueField: "DepartmentId",
             textField: "DepartmentName"
+        }
+    )
+}
+
+
+const LoadManagerSelection = () => {
+    createSelectOptions(
+        "#managerId",
+        {
+            url: UB + "/Admin/GetSectionHeadId",
+            placeholder: "Employee name",
+            valueField: "Id",
+            textField: "Name"
         }
     )
 }
@@ -162,6 +218,12 @@ $(function () {
         DeleteDepartment(dataId);
     });
 
+    $(document).on('click', '.btn-assign-manager', function () {
+        const deptid = $(this).data("id");
+
+        $('#AssignManagerModal').data("id", deptid);
+    });
+
     $('#AddDepartmentModal').on('show.bs.modal', function () {
         $('#AddDepartmentForm').on('submit', function (e) {
             e.preventDefault();
@@ -171,6 +233,20 @@ $(function () {
             };
 
             CreateDepartment(formData);
+        });
+    });
+
+    $('#AssignManagerModal').on('show.bs.modal', function () {
+        LoadManagerSelection();
+
+        $('#AssignManagerForm').on('submit', function (e) {
+            e.preventDefault();
+            const deptid = $("#AssignManagerModal").data("id");
+            const id = parseInt($("#managerId").val(), 10);
+
+            console.log(deptid, id);
+
+            UpdateDeptHead(id, deptid);
         });
     });
 });

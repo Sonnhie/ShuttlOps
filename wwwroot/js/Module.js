@@ -4,7 +4,7 @@ const LoadModulePage = () => {
     return createDataTable(
         "#moduleTable",
         {
-            url: "/Admin/GetModules",
+            url: UB + "/Admin/GetModules",
             searchPlaceholder: "Search Module ID...",
             order: [[0, 'asc']],
             columns: [
@@ -45,7 +45,7 @@ const LoadModuleSelection = () => {
     createSelectOptions(
         "#moduleFilter",
         {
-            url: "/Admin/GetModulesSelection",
+            url: UB + "/Admin/GetModulesSelection",
             placeholder: "Module",
             valueField: "ModuleId",
             textField: "ModuleName"
@@ -70,7 +70,7 @@ const ChangeStatus = (toggleSwitch) => {
         () => {
             showLoading(`Modult turning ${actionText}...`);
             $.ajax({
-                url: "/Admin/UpdateModuleStatus",
+                url: UB + "/Admin/UpdateModuleStatus",
                 type: "POST",
                 contentType: "application/json",
                 data: JSON.stringify({
@@ -116,7 +116,7 @@ const CreateNewModule = (form) => {
         () => {
             showLoading("Creating Module...");
             $.ajax({
-                url: "/Admin/CreateModule",
+                url: UB + "/Admin/CreateModule",
                 type: "POST",
                 contentType: "application/json; charset=utf-8",
                 data: JSON.stringify(form),

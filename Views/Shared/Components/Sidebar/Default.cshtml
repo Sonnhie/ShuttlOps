@@ -190,7 +190,11 @@
             <i class="bi bi-file-earmark-bar-graph me-3 fs-6"></i>
             <span>Reports</span>
         </a>
-
+        <a asp-controller="Admin" asp-action="Users"
+           class="nav-link-sub d-flex align-items-center py-1.5 @(isAdminArea && currentAction == "Users" ? "active" : "")">
+            <i class="bi bi bi-people-fill me-3 fs-6"></i>
+            <span>Users</span>
+        </a>
         <a asp-controller="User" asp-action="Settings"
            class="nav-link-custom d-flex align-items-center px-3 py-2 mb-1 @(isUserArea && currentAction == "Settings" ? "active" : "")">
             <i class="bi bi-sliders me-3 fs-6"></i>

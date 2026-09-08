@@ -1,6 +1,4 @@
-/**
- * ShuttlOps - General Affairs Fleet Workspace JS
- */
+﻿
 (() => {
     const workspacePanels = new Set(['ga-overview', 'fleet-vehicles', 'fleet-drivers']);
     const state = { vehicles: [], drivers: [], trips: [] };
@@ -43,7 +41,7 @@
 
     function createFleetTables() {
         createDataTable('#VehicleTable', {
-            url: '/GA/GetVehicle',
+            url: UB + '/GA/GetVehicle',
             searchPlaceholder: 'Search vehicles…',
             order: [[1, 'asc']],
             columns: [
@@ -57,7 +55,7 @@
         });
 
         createDataTable('#DriverTable', {
-            url: '/GA/GetDrivers',
+            url: UB + '/GA/GetDrivers',
             searchPlaceholder: 'Search drivers…',
             order: [[1, 'asc']],
             columns: [
@@ -72,9 +70,9 @@
     }
 
     function loadOverview() {
-        const vehiclesRequest = $.getJSON('/GA/GetVehicle').then(data => { state.vehicles = Array.isArray(data) ? data : (data.data || []); });
-        const driversRequest = $.getJSON('/GA/GetDrivers').then(data => { state.drivers = Array.isArray(data) ? data : (data.data || []); });
-        const tripsRequest = $.getJSON('/GA/GetApprovedRequest').then(data => { state.trips = Array.isArray(data) ? data : (data.data || []); });
+        const vehiclesRequest = $.getJSON(UB + '/GA/GetVehicle').then(data => { state.vehicles = Array.isArray(data) ? data : (data.data || []); });
+        const driversRequest = $.getJSON(UB + '/GA/GetDrivers').then(data => { state.drivers = Array.isArray(data) ? data : (data.data || []); });
+        const tripsRequest = $.getJSON(UB + '/GA/GetApprovedRequest').then(data => { state.trips = Array.isArray(data) ? data : (data.data || []); });
 
         $.when(vehiclesRequest, driversRequest, tripsRequest)
             .done(() => {
@@ -164,11 +162,9 @@
                 <label class="form-label fw-semibold small">Status</label>
                 <select class="form-select" id="driverStatus">
                     <option value="Available" ${currentStatus === 'Available' ? 'selected' : ''}>Available</option>
-                    <option value="Active" ${currentStatus === 'Active' ? 'selected' : ''}>Active</option>
                     <option value="Assigned" ${currentStatus === 'Assigned' ? 'selected' : ''}>Assigned</option>
                     <option value="In Transit" ${currentStatus === 'In Transit' ? 'selected' : ''}>In Transit</option>
                     <option value="On Leave" ${currentStatus === 'On Leave' ? 'selected' : ''}>On Leave</option>
-                    <option value="Inactive" ${currentStatus === 'Inactive' ? 'selected' : ''}>Inactive</option>
                 </select>
                </div>
                <div class="col-md-12">

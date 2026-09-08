@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,7 +21,7 @@ namespace ShuttlOps.Controllers
             {
                 var role = User.FindFirst(ClaimTypes.Role)?.Value;
                 var redirectUrl = AuthController.GetDashboardUrlForRole(role);
-                return Redirect(redirectUrl);
+                return Redirect(Url.Content("~" + redirectUrl));
             }
 
             return View();
@@ -30,6 +30,13 @@ namespace ShuttlOps.Controllers
         [HttpGet("/Account/ForgotPassword")]
         [AllowAnonymous]
         public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        [HttpGet("/Account/ChangePassword")]
+        [AllowAnonymous]
+        public IActionResult ChangePassword()
         {
             return View();
         }

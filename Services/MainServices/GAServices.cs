@@ -353,6 +353,7 @@ namespace ShuttlOps.Services.MainServices
                             Url = "/User/TripSchedule"
                         });
                     }
+
                     await notificationService.SendToRoleAsync("Security", new NotificationMessageDTO
                     {
                         Title = "New Dispatch Clearance Ready",
@@ -361,8 +362,8 @@ namespace ShuttlOps.Services.MainServices
                         TicketNumber = isTicketExist.TicketNumber,
                         Url = "/Security/SecurityLogs"
                     });
-                    // Section Head: notify from assigned driver
-                    await notificationService.SendToRoleInDepartmentAsync("Section Approver", isTicketExist.RequestedDepartment ?? "", new NotificationMessageDTO
+
+                    await notificationService.SendToSectionHeadOfDepartmentAsync(isTicketExist.RequestedDepartment ?? "", new NotificationMessageDTO
                     {
                         Title = "Driver & Vehicle Assigned",
                         Message = $"Driver {Dispatch.DriverName} and vehicle {Dispatch.PlateNumber} assigned to ticket {isTicketExist.TicketNumber}.",
@@ -371,6 +372,7 @@ namespace ShuttlOps.Services.MainServices
                         Url = "/User/TripSchedule"
                     });
                 }
+
                 return (true, "Dispatch Details successfully created.");
 
             }

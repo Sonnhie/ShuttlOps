@@ -1,20 +1,24 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ShuttlOps.DTOs;
 using ShuttlOps.Hubs;
+using ShuttlOps.Models;
 using ShuttlOps.Models.Temp;
 using ShuttlOps.Services.Interfaces;
-using ShuttlOps.Models;
+using System.Security.Claims;
 
 namespace ShuttlOps.Services.MainServices
 {
     public class NotificationService(
         IHubContext<NotificationHub> hubContext,
         ShuttlOpsDbContext dbContext,
+        IHttpContextAccessor httpContextAccessor,
         ILogger<NotificationService> logger
     ) : INotificationService
     {
+
         public async Task SendToUserAsync(string userId, NotificationMessageDTO notification)
         {
             try
@@ -22,12 +26,13 @@ namespace ShuttlOps.Services.MainServices
                 if (string.IsNullOrEmpty(userId) || notification == null) return;
 
 
-                    var user = await dbContext.UserTables
+                var user = await dbContext.UserTables
                         .Where(u => u.UserName == userId)
                         .Select(u => u.Id)
                         .FirstOrDefaultAsync();
                     if (user == 0) { logger.LogWarning("SendToUserAsync: No user found with UserName={UserId} in UserTables. Notification NOT saved.", userId); return; }
-                   
+
+
 
                 await SaveNotificationAsync(user, notification);
 
@@ -142,6 +147,38 @@ namespace ShuttlOps.Services.MainServices
             catch (Exception ex)
             {
                 logger.LogError(ex, "Failed to broadcast notification");
+            }
+        }
+
+        public async Task SendToSectionHeadOfDepartmentAsync(string departmentName, NotificationMessageDTO notification)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(departmentName) || notification == null) return;
+
+                var managerIds = await dbContext.Departments
+                                .Where(d => d.DepartmentName == departmentName && d.ManagerId.HasValue)
+                                .Select(d => d.ManagerId!.Value)
+                                .Distinct()
+                                .ToListAsync();
+
+                if (!managerIds.Any())
+                {
+                    logger.LogWarning(
+                        "No Section Head is assigned to department {Department}",
+                        departmentName);
+                    return;
+                }
+
+                foreach (var managerId in managerIds)
+                    await SaveNotificationAsync(managerId, notification);
+
+                var groups = managerIds.Select(id => $"User_{id}").ToList();
+                await hubContext.Clients.Groups(groups).SendAsync("ReceiveNotification", notification);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to send notification to section head of department {Department}", departmentName);
             }
         }
 

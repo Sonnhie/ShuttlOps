@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ShuttlOps - Transportation Reports Module
  */
 (() => {
@@ -9,7 +9,7 @@
 
     function initReportsTable() {
         dataTableInstance = createDataTable('#ReportsTable', {
-            url: '/Request/GetAllRequests',
+            url: UB + '/Request/GetAllRequests',
             searchPlaceholder: 'Search reports…',
             order: [[1, 'desc']],
             columns: [
@@ -64,7 +64,7 @@
         });
 
         // Fetch raw data to hold for filtering
-        $.getJSON('/Request/GetAllRequests').done(res => {
+        $.getJSON(UB + '/Request/GetAllRequests').done(res => {
             rawRecords = Array.isArray(res) ? res : (res.data || []);
             updateSummaryStats();
         });
@@ -100,7 +100,7 @@
     function loadDepartmentsDropdown() {
         if ($('#reportDepartmentFilter').length) {
             createSelectOptions('#reportDepartmentFilter', {
-                url: '/Admin/GetAllDepartments',
+                url: UB + '/Admin/GetAllDepartments',
                 placeholder: 'Department',
                 valueField: 'DepartmentName',
                 textField: 'DepartmentName'

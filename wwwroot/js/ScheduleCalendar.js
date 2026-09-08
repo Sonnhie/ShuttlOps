@@ -13,7 +13,7 @@
     let polltimer = null;
 
     function loadScheduleData() {
-        $.getJSON('/Request/GetScheduledTrip')
+        $.getJSON(UB + '/Request/GetScheduledTrip')
             .done(res => {
                 state.allTrips = Array.isArray(res) ? res : (res.data || []);
                 const todayKey = formatKey(new Date());
@@ -30,7 +30,7 @@
         StopPolling();
         polltimer = setInterval(() => {
             if (document.hidden) return; // Skip polling if the page is not visible
-            $.getJSON('/Request/GetScheduledTrip')
+            $.getJSON(UB + '/Request/GetScheduledTrip')
                 .done(res => {
                     const trips = Array.isArray(res) ? res : (res.data || []);
                     if (JSON.stringify(trips) !== JSON.stringify(state.allTrips)) {

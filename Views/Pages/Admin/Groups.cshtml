@@ -32,6 +32,9 @@
 
     <partial name="~/Views/Shared/Partials/Modal/_GenericModal.cshtml"
              model='new ReusableModalDTO { ModalId = "AddDepartmentModal", ModalTitle = "Create Department", ModalIcon = "bi-folder-fill", FormId = "AddDepartmentForm", SubmitButtonText = "Create department", BodyPartialName = "~/Views/Shared/Partials/Forms/_DepartmentFormPartial.cshtml" }' />
+
+    <partial name="~/Views/Shared/Partials/Modal/_GenericModal.cshtml"
+             model='new ReusableModalDTO { ModalId = "AssignManagerModal", ModalTitle = "Assign Manager", ModalIcon = "bi-person-check-fill", FormId = "AssignManagerForm", SubmitButtonText = "Assign Manager", BodyPartialName = "~/Views/Shared/Partials/Forms/_AssignFormPartial.cshtml" }' />
 </div>
 
 @section Scripts { <script src="~/js/Group.js"></script> }

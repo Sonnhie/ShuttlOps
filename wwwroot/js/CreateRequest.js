@@ -1,4 +1,4 @@
-const CreateRequest = (forms) => {
+﻿const CreateRequest = (forms) => {
     let form = forms;
     showConfirm("Confirm Submission",
         "Are you sure you want to submit this trip ticket?",
@@ -7,7 +7,7 @@ const CreateRequest = (forms) => {
         () => {
             showLoading("Submitting trip ticket...");
             $.ajax({
-                url: "/Request/CreateRequest",
+                url: UB + "/Request/CreateRequest",
                 type: "POST",
                 contentType: "application/json; charset=utf-8",
                 headers: {
@@ -18,7 +18,7 @@ const CreateRequest = (forms) => {
                     hideLoading();
                     if (response.success) {
                         showAlertWithCallback("success", response.message || "Trip ticket created successfully!", () => {
-                            window.location.href = response.redirectUrl || "/User/TripSchedule";
+                            window.location.href = UB + (response.redirectUrl || "/User/TripSchedule");
                         });
                     } else {
                         showAlert("error", response.message || "An error occurred while creating the trip ticket.");

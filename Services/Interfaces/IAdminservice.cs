@@ -8,9 +8,12 @@ namespace ShuttlOps.Services.Interfaces
         Task<object> GetDepartments();
         Task<object> GetRoles();
         Task<(bool isSuccess, string message)> CreateUser(UserDto userDto);
+        Task<(bool isSuccess, string message)> UpdateUser(UserDto userDto);
         Task<(bool isSuccess, string message)> DeleteUser(int id);
         Task<(bool isSuccess, string message)> ResetPassword(int id);
         Task<List<DepartmentDTO>> GetAllDepartments();
+        Task<(bool isSuccess, string message)> UpdateDeptHead(int id, int deptid);
+        Task<object> GetSectionHeadId();
         Task<(bool isSuccess, string message)> DeleteDepartment(int id);
         Task<(bool isSuccess, string message)> CreateDepartment(DepartmentDTO departmentDTO);
         Task<List<ModuleDTO>> GetModules();

@@ -14,15 +14,15 @@
     const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
 
     function loadData() {
-        const reqPromise = $.getJSON('/Request/GetAllRequests').then(res => {
+        const reqPromise = $.getJSON(UB + '/Request/GetAllRequests').then(res => {
             state.allRequests = Array.isArray(res) ? res : (res.data || []);
         });
 
-        const vehPromise = $.getJSON('/Request/GetVehicle').then(res => {
+        const vehPromise = $.getJSON(UB + '/Request/GetVehicle').then(res => {
             state.vehicles = Array.isArray(res) ? res : (res.data || []);
         });
 
-        const drvPromise = $.getJSON('/Request/GetDrivers').then(res => {
+        const drvPromise = $.getJSON(UB + '/Request/GetDrivers').then(res => {
             state.drivers = Array.isArray(res) ? res : (res.data || []);
         });
 

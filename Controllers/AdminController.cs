@@ -61,6 +61,29 @@ namespace ShuttlOps.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> GetSectionHeadId()
+        {
+            var users = await adminservice.GetSectionHeadId();
+            return new JsonResult(new
+            {
+                success = true,
+                data = users
+            });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateDeptHead(int deptid, int id)
+        {
+            var (isSuccess, message) = await adminservice.UpdateDeptHead(deptid, id);
+            return new JsonResult(new
+            {
+                success = isSuccess,
+                message = message
+            });
+        }
+
+        [HttpGet]
         public async Task<IActionResult> GetRoles()
         {
             var roles = await adminservice.GetRoles();
@@ -75,6 +98,18 @@ namespace ShuttlOps.Controllers
         public async Task<IActionResult> CreateUser([FromBody] UserDto userDto)
         {
             var (isSuccess, message) = await adminservice.CreateUser(userDto);
+            return new JsonResult(new
+            {
+                success = isSuccess,
+                message = message
+            });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateUser([FromBody] UserDto userDto)
+        {
+            var (isSuccess, message) = await adminservice.UpdateUser(userDto);
             return new JsonResult(new
             {
                 success = isSuccess,

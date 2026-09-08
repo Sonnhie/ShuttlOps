@@ -12,8 +12,8 @@ namespace ShuttlOps.Services
             services.AddScoped<IAdminservice, AdminService>();
             services.AddScoped<IGAService, GAServices>();
             services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<IEmailService, EmailService>();
             return services;
         }
     }
 }
-

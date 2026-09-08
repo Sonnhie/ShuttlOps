@@ -1,4 +1,4 @@
-@{
+﻿@{
     // Extract all roles from the current user's claims
     var roles = User.Claims
         .Where(c => c.Type == System.Security.Claims.ClaimTypes.Role)
@@ -13,7 +13,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - ShuttlOps</title>
+    <title>@ViewData["Title"] - Shuttle Operation Portal</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -27,6 +27,9 @@
 
     <!-- Custom Application Styles -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <!-- Base URL for JavaScript AJAX calls (resolves to /ShuttlOps in sub-folder deployment) -->
+    <script>var UB = '@Url.Content("~")';</script>
 </head>
 <body class="app-body" data-user-roles="@userRolesString">
     @Html.AntiForgeryToken()
@@ -38,7 +41,7 @@
                 <a class="text-decoration-none d-flex align-items-center" href="~/" aria-label="ShuttlOps home">
                     <span class="brand-mark me-2"><i class="bi bi-bus-front-fill"></i></span>
                     <span class="d-flex flex-column lh-sm">
-                        <span class="fs-5 fw-bold">ShuttlOps</span>
+                        <span class="fs-5 fw-bold">Shuttle Operation Portal</span>
                         <span class="brand-caption mt-1">Mobility Operations</span>
                     </span>
                 </a>
@@ -60,7 +63,7 @@
                     </button>
 
                     <div class="d-flex flex-column me-2 text-truncate">
-                        <span class="page-context">ShuttlOps Portal</span>
+                        <span class="page-context">Shuttle Operation Portal</span>
                         <h1 class="fw-semibold text-dark fs-6 mb-0 text-truncate">@ViewData["Title"]</h1>
                     </div>
 

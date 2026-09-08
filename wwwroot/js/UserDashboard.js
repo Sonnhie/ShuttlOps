@@ -15,7 +15,7 @@
     };
 
     function loadDashboardData() {
-        $.getJSON('/Request/GetAllRequests')
+        $.getJSON(UB + '/Request/GetAllRequests')
             .done(res => {
                 state.trips = Array.isArray(res) ? res : (res.data || []);
                 renderMetrics();

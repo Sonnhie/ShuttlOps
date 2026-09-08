@@ -8,7 +8,7 @@ const LoadTripSchedule = () => {
     return createDataTable(
         "#TripScheduleTable",
         {
-            url: "/Request/GetAllRequests",
+            url: UB + "/Request/GetAllRequests",
             searchPlaceholder: "Search Ticket number...",
             order: [[2, 'desc']],
             columns: [
@@ -30,8 +30,10 @@ const LoadTripSchedule = () => {
                     const canSectionApprove = isSectionApprover && currentStatus === "Pending Section Head";
                     const canGAApprove = isGA && currentStatus === "Pending GA Approve";
                     const canAssign = isGA && currentStatus === "GA Approved";
-                    const canDelete = (isSectionApprover || isRequestor) && currentStatus === "Pending Section Approval";
+                    const canDelete = (isSectionApprover || isRequestor) && currentStatus === "Pending Section Head";
                     const canGADelete = isGA && currentStatus === "Request for cancellation";
+                    const canSectionDelete = (isSectionApprover || isRequestor) && currentStatus === "GA Approved";
+
 
                     let menuItems = [];
 
@@ -88,6 +90,17 @@ const LoadTripSchedule = () => {
                         `);
                     }
 
+                    if (canSectionDelete) {
+                        menuItems.push(`
+                            ${menuItems.length > 0 ? '<li><hr class="dropdown-divider"></li>' : ''}
+                            <li>
+                                <a class="dropdown-item text-danger btn-cancel-ticket" href="#" data-id="${ticketId}">
+                                    <i class="bi bi-trash me-2"></i> Request for Cancellation
+                                </a>
+                            </li>
+                        `);
+                    }
+
                     // If no actions available for the current role/status, show a disabled state
                     if (menuItems.length === 0) {
                           return `<span class="text-muted small">No actions</span>`;
@@ -118,11 +131,12 @@ const ProcessApproval = (id, status) => {
         () => {
             showLoading("Validating approval...");
             $.ajax({
-                url: "/Request/ProcessApproval",
+                url: UB + "/Request/ProcessApproval",
                 type: "POST",
                 data: {
                     status: status,
-                    id: id
+                    id: id,
+                    __RequestVerificationToken: token
                 },
                 success: function (response) {
                     hideLoading();
@@ -160,10 +174,11 @@ const DeleteRequest = (id) => {
         () => {
             showLoading("Deleting Request...");
             $.ajax({
-                url: "/Request/DeleteRequestApproval",
+                url: UB + "/Request/DeleteRequestApproval",
                 type: "POST",
                 data: {
-                    id: id
+                    id: id,
+                    __RequestVerificationToken: token
                 },
                 success: function (response) {
                     hideLoading();
@@ -209,7 +224,7 @@ const DriverSelection = () => {
     createSelectOptions(
         "#driverName",
         {
-            url: "/Request/GetDrivers",
+            url: UB + "/Request/GetDrivers",
             placeholder: "Driver",
             valueField: "Id",
             textField: "DriverName"
@@ -221,7 +236,7 @@ const VehicleSelection = () => {
     createSelectOptions(
         "#vehicleName",
         {
-            url: "/Request/GetVehicle",
+            url: UB + "/Request/GetVehicle",
             placeholder: "Vehicle",
             valueField: "Id",
             textField: "VehicleModel"
@@ -231,7 +246,7 @@ const VehicleSelection = () => {
 
 const PlateNumberTxt = (vehicleid) => {
     $.ajax({
-        url: "/Request/GetPlatenumber",
+        url: UB + "/Request/GetPlatenumber",
         type: "GET",
         data: {
             id: vehicleid
@@ -247,7 +262,7 @@ const PlateNumberTxt = (vehicleid) => {
 
 const VehicleStatus = (vehicleid) => {
     $.ajax({
-        url: "/Request/GetVehicleStatus",
+        url: UB + "/Request/GetVehicleStatus",
         type: "GET",
         data: {
             id: vehicleid
@@ -263,7 +278,7 @@ const VehicleStatus = (vehicleid) => {
 
 const CapacityTxt = (vehicleid) => {
     $.ajax({
-        url: "/Request/GetCapacity",
+        url: UB + "/Request/GetCapacity",
         type: "GET",
         data: {
             id: vehicleid
@@ -299,7 +314,7 @@ const AssignDriver = () => {
             showLoading("Processing...");
 
             $.ajax({
-                url: "/GA/AssignDriver",
+                url: UB + "/GA/AssignDriver",
                 type: "POST",
                 contentType: "application/json",
                 // Pass Anti-Forgery Token via Headers instead of the JSON body

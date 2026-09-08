@@ -10,6 +10,7 @@ namespace ShuttlOps.Services.Interfaces
         Task SendToRolesAsync(IEnumerable<string> roles, NotificationMessageDTO notification);
         Task SendToDepartmentAsync(string department, NotificationMessageDTO notification);
         Task SendToRoleInDepartmentAsync(string role, string department, NotificationMessageDTO notification);
+        Task SendToSectionHeadOfDepartmentAsync(string departmentName, NotificationMessageDTO notification);
         Task BroadcastAsync(NotificationMessageDTO notification);
 
         Task<List<Notification>> GetUserNotificationsAsync(int userId, int take = 20);

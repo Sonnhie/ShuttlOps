@@ -13,7 +13,7 @@ namespace ShuttlOps.Services.MainServices
         IHttpContextAccessor httpContextAccessor) : IAuthenticationservice
     {
 
-        public async Task<(bool isSuccess, string message, string? role)> AuthenticateUser(string username, string password)
+        public async Task<(bool isSuccess, bool changePassRequired, string message, string? role)> AuthenticateUser(string username, string password)
         {
             try
             {
@@ -24,13 +24,13 @@ namespace ShuttlOps.Services.MainServices
                                 .FirstOrDefaultAsync();
                 if (user == null)
                 {
-                    return (false, "Invalid username or password.", null);
+                    return (false, false, "Invalid username or password.", null);
                 }
 
                 bool isPasswordValid = BCrypt.Net.BCrypt.Verify(password, user.Password);
                 if (!isPasswordValid)
                 {
-                    return (false, "Incorrect password.", null);
+                    return (false, false, "Incorrect password.", null);
                 }
 
                 var roleName = user.Role?.RoleName ?? "Requestor";
@@ -56,15 +56,22 @@ namespace ShuttlOps.Services.MainServices
                         ExpiresUtc = DateTime.UtcNow.AddHours(24)
                     });
 
+
+                    if (password == "Password01")
+                    {
+                        return (true, true, "Please change your default password", null);
+                    }
+
+
                     await dbcontext.SaveChangesAsync();
                 }
 
-                return (true, "Authentication Successfull.", roleName);
+                return (true, false, "Authentication Successfull.", roleName);
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Authentication failed due to an exception");
-                return (false, $"SQL Error: {ex.Message}", null);
+                return (false, false, $"SQL Error: {ex.Message}", null);
             }
         }
 
@@ -104,6 +111,11 @@ namespace ShuttlOps.Services.MainServices
                     return (false, "New password and confirm password do not match.");
                 }
 
+                if (dto.CurrentPassword == dto.NewPassword)
+                {
+                    return (false, "New password cannot be the same as the current password.");
+                }
+
                 var httpContext = httpContextAccessor.HttpContext;
                 var userIdStr = httpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
                 if (string.IsNullOrEmpty(userIdStr) || !int.TryParse(userIdStr, out int userId))
@@ -124,14 +136,22 @@ namespace ShuttlOps.Services.MainServices
                 }
 
                 user.Password = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+
+                // Save changes first to confirm DB persistence
                 await dbcontext.SaveChangesAsync();
 
-                return (true, "Password changed successfully.");
+                // Sign out only after successful save
+                if (httpContext != null)
+                {
+                    await httpContext.SignOutAsync("Login");
+                }
+
+                return (true, "Password changed successfully. Redirecting...");
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "An error occurred while changing password.");
-                return (false, $"Error changing password: {ex.Message}");
+                return (false, "An unexpected error occurred while changing your password. Please try again.");
             }
         }
     }

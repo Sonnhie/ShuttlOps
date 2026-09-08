@@ -384,6 +384,57 @@ const TableColumnsConfig = {
     }
 }
 
+//const createSelectOptions = (selectId, options = {}) => {
+//    const selectElement = $(selectId);
+//    if (!selectElement.length) return;
+
+//    const settings = {
+//        url: "",
+//        placeholder: "Option",
+//        valueField: "id",
+//        textField: "name",
+//        selectedValue: null,
+//        dataSrc: (res) => res.data || res,
+//        onChange: null
+//    };
+
+//    $.extend(settings, options);
+
+//    if (!settings.url) {
+//        console.error("populateSelect error: 'url' parameter is required.");
+//        return;
+//    }
+
+//    selectElement.html(`<option value="">Loading ${settings.placeholder}s...</option>`).prop("disabled", true);
+
+//    return $.ajax({
+//        type: "GET",
+//        url: settings.url,
+//        success: function (response) {
+//            const items = settings.dataSrc(response) || [];
+
+//            selectElement.empty().prop("disabled", false);
+//            selectElement.append(`<option value="">-- Select ${settings.placeholder}</option>`);
+
+//            $.each(items, function (index, item) {
+//                const val = item[settings.valueField];
+//                const text = item[settings.textField];
+//                const isSelected = settings.selectedValue && val == settings.selectedValue ? "selected" : "";
+//                selectElement.append(`<option value="${val}" ${isSelected}>${text}</option>`);
+//            });
+
+//            if (typeof settings.onChange === "function") {
+//                selectElement.off("change.populate").on("change.populate", settings.onChange);
+//            }
+//        },
+//        error: function (xhr) {
+//            selectElement.html(`<option value="">Failed to load ${settings.placeholder}s</option>`).prop("disabled", false);
+//            console.error(`Failed to populate ${selectId}:`, xhr);
+//        }
+//    });
+//}
+
+
 const createSelectOptions = (selectId, options = {}) => {
     const selectElement = $(selectId);
     if (!selectElement.length) return;
@@ -391,10 +442,22 @@ const createSelectOptions = (selectId, options = {}) => {
     const settings = {
         url: "",
         placeholder: "Option",
-        valueField: "id",       
-        textField: "name",      
-        selectedValue: null,   
-        dataSrc: (res) => res.data || res, 
+        valueField: "id",
+        textField: "name",
+        selectedValue: null,
+        dataSrc: (res) => res.data || res,
+        // Smart adapter: Automatically handles List vs Dictionary
+        formatItem: (keyOrIndex, item, settings) => {
+            // Case 1: Simple Dictionary { "101": "Apple", "102": "Banana" }
+            if (typeof item !== "object" || item === null) {
+                return { value: keyOrIndex, text: item };
+            }
+            // Case 2: Array List or Nested Dictionary [{ id: 1, name: "Apple" }]
+            return {
+                value: item[settings.valueField],
+                text: item[settings.textField]
+            };
+        },
         onChange: null
     };
 
@@ -414,13 +477,13 @@ const createSelectOptions = (selectId, options = {}) => {
             const items = settings.dataSrc(response) || [];
 
             selectElement.empty().prop("disabled", false);
-            selectElement.append(`<option value="">-- Select ${settings.placeholder}</option>`);
+            selectElement.append(`<option value="">-- Select ${settings.placeholder} --</option>`);
 
-            $.each(items, function (index, item) {
-                const val = item[settings.valueField];
-                const text = item[settings.textField];
-                const isSelected = settings.selectedValue && val == settings.selectedValue ? "selected" : "";
-                selectElement.append(`<option value="${val}" ${isSelected}>${text}</option>`);
+            $.each(items, function (keyOrIndex, item) {
+                const { value, text } = settings.formatItem(keyOrIndex, item, settings);
+                const isSelected = settings.selectedValue && value == settings.selectedValue ? "selected" : "";
+
+                selectElement.append(`<option value="${value}" ${isSelected}>${text}</option>`);
             });
 
             if (typeof settings.onChange === "function") {
@@ -432,7 +495,8 @@ const createSelectOptions = (selectId, options = {}) => {
             console.error(`Failed to populate ${selectId}:`, xhr);
         }
     });
-}
+};
+
 
 const token = $('input[name="__RequestVerificationToken"]').val();
 

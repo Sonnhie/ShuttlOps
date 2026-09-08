@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
     const workspaceHashes = new Set(['ga-overview', 'fleet-vehicles', 'fleet-drivers', 'ga-calendar', 'app-settings']);
     const state = { vehicles: [], drivers: [], trips: [], calendarDate: new Date() };
 
@@ -77,7 +77,7 @@
         createDataTable(
             "#VehicleTable",
             {
-                url: "/GA/GetVehicle",
+                url: UB + "/GA/GetVehicle",
                 searchPlaceholder: "Search Vehicle Model...",
                 order: [[2, 'desc']],
                 columns: [

@@ -7,7 +7,7 @@
         () => {
             showLoading(`Logout user...`);
             $.ajax({
-                url: "/Auth/Logout",
+                url: UB + "/Auth/Logout",
                 type: "POST",
                 headers: {
                     "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
@@ -15,7 +15,7 @@
                 success: function (res) {
                     if (res.success) {
                         showAlertWithCallback("success", res.message || "Logout successfully!", () => {
-                            window.location.href = res.redirectUrl || "/Account/Login";
+                            window.location.href = UB + (res.redirectUrl || "/Account/Login");
                         });
                     } else {
                         showAlert("error", res.message || "An error occurred while Logout the user.");

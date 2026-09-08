@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ShuttlOps - Change Password JS Module
  */
 (() => {
@@ -59,7 +59,7 @@
                 function () {
                     showLoading('Updating password...');
                     $.ajax({
-                        url: '/Account/ChangePassword',
+                        url: UB + '/Account/ChangePassword',
                         type: 'POST',
                         contentType: 'application/json; charset=utf-8',
                         headers: {
@@ -72,7 +72,7 @@
                                 showToast('success', res.message || 'Password changed successfully!');
                                 $('#changePasswordForm')[0].reset();
                                 setTimeout(function () {
-                                    window.location.href = '/User/Settings';
+                                    window.location.href = UB + '/User/Settings';
                                 }, 1500);
                             } else {
                                 showToast('error', res.message || 'Failed to update password.');

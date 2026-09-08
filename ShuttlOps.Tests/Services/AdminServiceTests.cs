@@ -12,6 +12,8 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Xunit;
+using Microsoft.Extensions.Configuration;
+using ShuttlOps.Services.Interfaces;
 
 namespace ShuttlOps.Tests.Services
 {
@@ -20,6 +22,8 @@ namespace ShuttlOps.Tests.Services
         private readonly ShuttlOpsDbContext _dbContext;
         private readonly Mock<ILogger<AdminService>> _mockLogger;
         private readonly Mock<IHttpContextAccessor> _mockHttpContextAccessor;
+        private readonly Mock<IEmailService> _mockEmailService;
+        private readonly Mock<IConfiguration> _mockConfiguration;
         private readonly AdminService _service;
 
         public AdminServiceTests()
@@ -31,8 +35,15 @@ namespace ShuttlOps.Tests.Services
             _dbContext = new ShuttlOpsDbContext(options);
             _mockLogger = new Mock<ILogger<AdminService>>();
             _mockHttpContextAccessor = new Mock<IHttpContextAccessor>();
+            _mockEmailService = new Mock<IEmailService>();
+            _mockConfiguration = new Mock<IConfiguration>();
 
-            _service = new AdminService(_dbContext, _mockLogger.Object, _mockHttpContextAccessor.Object);
+            _service = new AdminService(
+                _dbContext,
+                _mockLogger.Object,
+                _mockHttpContextAccessor.Object,
+                _mockEmailService.Object,
+                _mockConfiguration.Object);
 
             SeedDatabase();
         }

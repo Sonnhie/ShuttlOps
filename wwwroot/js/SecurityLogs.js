@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ShuttlOps - Security & Attendance Logs JS Module
  */
 (() => {
@@ -11,7 +11,7 @@
 
     function initSecurityTable() {
         securityDataTable = createDataTable('#SecurityLogsTable', {
-            url: '/Request/GetScheduledOnTrip',
+            url: UB + '/Request/GetScheduledOnTrip',
             searchPlaceholder: 'Search Security logs\u2026',
             order: [[1, 'desc']],
             columns: [
@@ -55,7 +55,7 @@
     }
 
     function loadCounts() {
-        $.getJSON('/Request/GetAllRequests').done(res => {
+        $.getJSON(UB + '/Request/GetAllRequests').done(res => {
             requestsData = Array.isArray(res) ? res : (res.data || []);
 
             const awaiting = requestsData.filter(r => valueOf(r, 'ApprovalStatus') === 'Assigned').length;
@@ -135,7 +135,7 @@
             "Cancel",
             function () {
                 showLoading("Dispatching gate clearance for ticket " + ticketNumber + "...");
-                $.post('/Request/DispatchConfirm', { TicketId: ticketId })
+                $.post(UB + '/Request/DispatchConfirm', { TicketId: ticketId, __RequestVerificationToken: token })
                 .done(res => {
                     hideLoading();
                     if (res.success) {
@@ -169,9 +169,12 @@
             function () {
                 showLoading('Verifying gate clearance for ticket ' + ticketNumber + '...');
                 $.ajax({
-                    url: '/Request/SecurityLogs',
+                    url: UB + '/Request/SecurityLogs',
                     type: 'POST',
                     contentType: 'application/json',
+                    headers: {
+                        "RequestVerificationToken": token
+                    },
                     data: JSON.stringify({
                         TicketId: parseInt(formData.TicketId) || 0,
                         ArrivalTime: formData.ArrivalTime,

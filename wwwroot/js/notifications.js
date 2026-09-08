@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ShuttlOps - Real-Time Notification & SignalR Client
  */
 (() => {
@@ -12,7 +12,7 @@
         }
 
         const connection = new signalR.HubConnectionBuilder()
-            .withUrl('/Hubs/NotificationsHubs')
+            .withUrl(UB + '/Hubs/NotificationsHubs')
             .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
             .configureLogging(signalR.LogLevel.Warning)
             .build();
@@ -31,7 +31,7 @@
     }
 
     function loadNotificationsFromDB() {
-        $.getJSON('/Notification/GetNotifications')
+        $.getJSON(UB + '/Notification/GetNotifications')
             .done(function (res) {
                 if (res && res.success && Array.isArray(res.data)) {
                     notificationsHistory.length = 0;
@@ -97,7 +97,7 @@
 
     function markAllAsRead() {
         $.ajax({
-            url: '/Notification/MarkAllAsRead',
+            url: UB + '/Notification/MarkAllAsRead',
             type: 'POST',
             headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() }
         }).done(function () {

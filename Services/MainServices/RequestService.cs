@@ -1,9 +1,10 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShuttlOps.DTOs;
 using ShuttlOps.Models;
 using ShuttlOps.Services.Interfaces;
+using System;
 using System.Security.Claims;
 
 namespace ShuttlOps.Services.MainServices
@@ -16,15 +17,18 @@ namespace ShuttlOps.Services.MainServices
         INotificationService? notificationService = null
     ) : IRequestService
     {
+
         public async Task<(bool IsSuccess, string Message)> CreateRequest([FromBody] CreateTripTicketDTO ticketDTO)
         {
-            //await ResolveTransitStatuses();
             try
             {
                 if (ticketDTO == null)
                 {
                     return (false, "Invalid request payload.");
                 }
+
+                DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+                int daysBefore = (ticketDTO.TripDate.DayNumber - today.DayNumber);
 
                 if (ticketDTO.TripDate < DateOnly.FromDateTime(DateTime.Today))
                 {
@@ -39,6 +43,10 @@ namespace ShuttlOps.Services.MainServices
                     }
                 }
 
+                if (daysBefore < 3)
+                {
+                    return (false, "Request must be made at least 3 days prior to the trip date.");
+                }
 
                 if (string.IsNullOrWhiteSpace(ticketDTO.PickupLocation))
                 {
@@ -58,6 +66,11 @@ namespace ShuttlOps.Services.MainServices
                 if (ticketDTO.DepartureTime >= ticketDTO.ArrivalTime)
                 {
                     return (false, "Estimated arrival time must be later than estimated departure time.");
+                }
+
+                if(ticketDTO.Passengers == null)
+                {
+                    return (false, "Invalid passenger.");
                 }
 
                 var httpContext = httpContextAccessor.HttpContext;
@@ -104,7 +117,6 @@ namespace ShuttlOps.Services.MainServices
                 int seq = await GenerateTicketId();
                 if (seq <= 0)
                 {
-                    // Fallback to request_sequence table count
                     var todayOnly = DateOnly.FromDateTime(DateTime.Today);
                     var todaySeq = await dbContext.RequestSequences.FirstOrDefaultAsync(s => s.SeqDate == todayOnly);
                     if (todaySeq != null)
@@ -120,7 +132,7 @@ namespace ShuttlOps.Services.MainServices
                     await dbContext.SaveChangesAsync();
                 }
 
-                string ticketNumber = $"REQ-{DateTime.Now:yyyyMMdd}-{seq:D4}";
+                string ticketNumber = $"TRIP-{DateTime.Now:yyyyMMdd}-{seq:D4}";
 
                 var passengers = (ticketDTO.Passengers ?? new List<PassengerDTO>())
                     .Where(p => !string.IsNullOrWhiteSpace(p.PassengerName))
@@ -161,7 +173,8 @@ namespace ShuttlOps.Services.MainServices
                         TicketNumber = ticketNumber,
                         Url = "/User/TripSchedule"
                     });
-                    await notificationService.SendToRoleInDepartmentAsync("Section Approver", userinfo.Department?.DepartmentName ?? "General", new NotificationMessageDTO
+
+                    await notificationService.SendToSectionHeadOfDepartmentAsync(userinfo.Department?.DepartmentName ?? "General", new NotificationMessageDTO
                     {
                         Title = "Section Approval Required",
                         Message = $"New trip ticket {ticketNumber} submitted by {userinfo.EmployeeName ?? userinfo.UserName} for {ticketDTO.TripDate:yyyy-MM-dd}.",
@@ -228,12 +241,22 @@ namespace ShuttlOps.Services.MainServices
         public async Task<List<TripTicketResponseDTO>> GetAllRequests()
         {
             var query = dbContext.TripTickets.AsQueryable();
-            //  await ResolveTransitStatuses();
+            
             var userinfo = await GetUserInfo();
-
-            if (userinfo.Role == "Requestor" || userinfo.Role == "Section Approver")
+            var userDepartmentName = userinfo.Department ?? string.Empty;
+            var userdept = await dbContext.Departments
+                .Where(x => x.ManagerId == userinfo.Id)
+                .Select(x => x.DepartmentName)
+                .ToListAsync();
+ 
+            if (userinfo.Role == "Requestor")
             {
                 query = query.Where(t => t.RequestedDepartment == userinfo.Department);
+            }
+
+            if (userinfo.Role == "Section Approver")
+            {
+                query = query.Where(t => userdept.Contains(t.RequestedDepartment));
             }
 
             var requests = await query
@@ -269,8 +292,16 @@ namespace ShuttlOps.Services.MainServices
         public async Task<List<TripTicketResponseDTO>> GetScheduledTrip()
         {
             var query = dbContext.TripTickets.AsQueryable();
-            //  await ResolveTransitStatuses();
             var userinfo = await GetUserInfo();
+            var userdept = await dbContext.Departments
+                .Where(x => x.ManagerId == userinfo.Id)
+                .Select(x => x.DepartmentName)
+                .ToListAsync();
+
+            if (userinfo.Role == "Section Approver")
+            {
+                query = query.Where(t => userdept.Contains(t.RequestedDepartment));
+            }
 
             var requests = await query
                 .Include(t => t.TripTicketPassengers)
@@ -306,8 +337,16 @@ namespace ShuttlOps.Services.MainServices
         public async Task<List<TripTicketResponseDTO>> GetOnTripScheduled()
         {
             var query = dbContext.TripTickets.AsQueryable();
-            // await ResolveTransitStatuses();
             var userinfo = await GetUserInfo();
+            var userdept = await dbContext.Departments
+                        .Where(x => x.ManagerId == userinfo.Id)
+                        .Select(x => x.DepartmentName)
+                        .ToListAsync();
+
+            if (userinfo.Role == "Section Approver")
+            {
+                query = query.Where(t => userdept.Contains(t.RequestedDepartment));
+            }
 
             var requests = await query
                 .Include(t => t.TripTicketPassengers)
@@ -429,7 +468,7 @@ namespace ShuttlOps.Services.MainServices
                                     TicketNumber = ticketNum,
                                     Url = "/User/TripSchedule"
                                 });
-                                await notificationService.SendToRoleInDepartmentAsync("Section Approver", dept, new NotificationMessageDTO
+                                await notificationService.SendToSectionHeadOfDepartmentAsync(dept, new NotificationMessageDTO
                                 {
                                     Title = $"Trip {status}",
                                     Message = $"Ticket {ticketNum} has been {status.ToLower()} by {userinfo?.EmployeeName ?? "Unknown"}.",
@@ -476,7 +515,7 @@ namespace ShuttlOps.Services.MainServices
                                 });
                             }
 
-                            await notificationService.SendToRoleInDepartmentAsync("Section Approver", dept, new NotificationMessageDTO
+                            await notificationService.SendToSectionHeadOfDepartmentAsync(dept, new NotificationMessageDTO
                             {
                                 Title = "GA Approved",
                                 Message = $"Ticket {ticketNum} has been approved by GA {userinfo?.EmployeeName ?? "Unknown"}.",
@@ -586,7 +625,7 @@ namespace ShuttlOps.Services.MainServices
                         TicketNumber = ticket.TicketNumber,
                         Url = "/User/TripSchedule"
                     });
-                    await notificationService.SendToRoleInDepartmentAsync("Section Approver", ticket.RequestedDepartment ?? "", new NotificationMessageDTO
+                    await notificationService.SendToSectionHeadOfDepartmentAsync(ticket.RequestedDepartment ?? "", new NotificationMessageDTO
                     {
                         Title = "Trip Completed",
                         Message = $"Trip ticket {ticket.TicketNumber} has been completed.",
@@ -608,7 +647,6 @@ namespace ShuttlOps.Services.MainServices
 
         public async Task<List<DriverDTO>> GetDriver()
         {
-          //  await ResolveTransitStatuses();
             try
             {
                 var drivers = await dbContext.Drivers
@@ -632,7 +670,6 @@ namespace ShuttlOps.Services.MainServices
 
         public async Task<List<VehicleDTO>> GetVehicle()
         {
-           // await ResolveTransitStatuses();
             try
             {
                 var vehicle = await dbContext.Vehicles

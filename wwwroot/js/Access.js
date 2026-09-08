@@ -2,7 +2,7 @@
     return createDataTable(
         "#permissionTable",
         {
-            url: "/Admin/GetPermissionList",
+            url: UB + "/Admin/GetPermissionList",
             searchPlaceholder: "Search Module ID...",
             order: [[0, 'asc']],
             columns: [
@@ -61,7 +61,7 @@ const ChangeStatus = (checkBox) => {
             showLoading(`${actionText} action...`);
 
             $.ajax({
-                url: "/Admin/UpdatePermissionAction",
+                url: UB + "/Admin/UpdatePermissionAction",
                 type: "POST",
                 data: {
                     id: permissionId,
@@ -109,7 +109,7 @@ const LoadRoleSelection = () => {
     createSelectOptions(
         "#role_select",
         {
-            url: "/Admin/GetRoles",
+            url: UB + "/Admin/GetRoles",
             placeholder: "Role",
             valueField: "RoleId",
             textField: "RoleName"
@@ -126,7 +126,7 @@ const CreateNewPermission = (form) => {
         () => {
             showLoading("Creating permission...");
             $.ajax({
-                url: "/Admin/CreatePermission",
+                url: UB + "/Admin/CreatePermission",
                 type: "POST",
                 contentType: "application/json; charset=utf-8",
                 data: JSON.stringify(form),
@@ -162,7 +162,7 @@ const LoadSelection = () => {
     createSelectOptions(
         "#roleSelect",
         {
-            url: "/Admin/GetRoles",
+            url: UB + "/Admin/GetRoles",
             placeholder: "Role",
             valueField: "RoleId",
             textField: "RoleName"
@@ -172,7 +172,7 @@ const LoadSelection = () => {
     createSelectOptions(
         "#moduleSelect",
         {
-            url: "/Admin/GetModulesSelection",
+            url: UB + "/Admin/GetModulesSelection",
             placeholder: "Module",
             valueField: "ModuleId",
             textField: "ModuleName"

@@ -13,7 +13,7 @@ namespace ShuttlOps.Controllers
     {
         [HttpPost("/Login")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> LoggedIn(LoginViewModel Input)
+        public async Task<IActionResult> LoggedIn([FromBody] LoginViewModel Input)
         {
             if (!ModelState.IsValid)
             {
@@ -21,6 +21,7 @@ namespace ShuttlOps.Controllers
                     .SelectMany(v => v.Errors)
                     .Select(e => e.ErrorMessage)
                     .FirstOrDefault();
+
                 return new JsonResult(new
                 {
                     success = false,
@@ -28,7 +29,7 @@ namespace ShuttlOps.Controllers
                 });
             }
 
-            var (isSuccess, message, role) = await authenticationService.AuthenticateUser(Input.UsernameInput, Input.PasswordInput);
+            var (isSuccess, changePasswordRequired, message, role) = await authenticationService.AuthenticateUser(Input.UsernameInput, Input.PasswordInput);
 
             if (!isSuccess)
             {
@@ -46,6 +47,7 @@ namespace ShuttlOps.Controllers
             {
                 success = true,
                 message = message,
+                requiredChangePassword = changePasswordRequired,
                 redirectUrl = redirectUrl
             });
         }
@@ -89,14 +91,15 @@ namespace ShuttlOps.Controllers
 
         public static string GetDashboardUrlForRole(string? role)
         {
-            return role switch
-            {
-                "Admin" => "/Admin/Index",
-                "GA" => "/GA/Index",
-                "Security" => "/User/SecurityLogs",
-                "Requestor" or "Section Approver" => "/User/Index",
-                _ => "/User/Index"
-            };
+       
+                return role switch
+                {
+                    "Admin" => "/Admin/Index",
+                    "GA" => "/GA/Index",
+                    "Security" => "/User/SecurityLogs",
+                    "Requestor" or "Section Approver" => "/User/Index",
+                    _ => "/User/Index"
+                };
         }
     }
 }
