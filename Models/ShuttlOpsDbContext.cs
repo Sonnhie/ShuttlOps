@@ -42,6 +42,15 @@ public partial class ShuttlOpsDbContext : DbContext
 
     public virtual DbSet<Notification> Notifications { get; set; }
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            string connection = Dbconnection.GetConnectionString();
+            optionsBuilder.UseSqlServer(connection);
+        }
+    }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Department>(entity =>

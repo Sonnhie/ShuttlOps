@@ -143,19 +143,19 @@
             General Affairs
         </div>
 
-        <a href="/GA#ga-overview" data-ga-nav="ga-overview"
+        <a href="~/GA#ga-overview" data-ga-nav="ga-overview"
            class="nav-link-custom d-flex align-items-center px-3 py-2 mb-1">
             <i class="bi bi-grid-1x2 me-3 fs-6"></i>
             <span>GA Overview</span>
         </a>
 
-        <a href="/GA#fleet-vehicles" data-ga-nav="fleet-vehicles"
+        <a href="~/GA#fleet-vehicles" data-ga-nav="fleet-vehicles"
            class="nav-link-custom d-flex align-items-center px-3 py-2 mb-1">
             <i class="bi bi-bus-front me-3 fs-6"></i>
             <span>Vehicles</span>
         </a>
 
-        <a href="/GA#fleet-drivers" data-ga-nav="fleet-drivers"
+        <a href="~/GA#fleet-drivers" data-ga-nav="fleet-drivers"
            class="nav-link-custom d-flex align-items-center px-3 py-2 mb-1">
             <i class="bi bi-person-vcard me-3 fs-6"></i>
             <span>Drivers</span>
@@ -191,7 +191,7 @@
             <span>Reports</span>
         </a>
         <a asp-controller="Admin" asp-action="Users"
-           class="nav-link-sub d-flex align-items-center py-1.5 @(isAdminArea && currentAction == "Users" ? "active" : "")">
+           class="nav-link-custom d-flex align-items-center py-1.5 @(isAdminArea && currentAction == "Users" ? "active" : "")">
             <i class="bi bi bi-people-fill me-3 fs-6"></i>
             <span>Users</span>
         </a>
@@ -208,7 +208,7 @@
         </div>
 
         <a asp-controller="User" asp-action="SecurityLogs"
-           class="nav-link-custom d-flex align-items-center px-3 py-2 mb-1 @(isUserArea && currentAction == "SecurityLogs" ? "active" : "")">
+            class="nav-link-custom d-flex align-items-center px-3 py-2 mb-1 @(isUserArea && currentAction == "SecurityLogs" ? "active" : "")">
             <i class="bi bi-shield-check me-3 fs-6"></i>
             <span>Security Logs</span>
         </a>
@@ -218,18 +218,6 @@
             <i class="bi bi-calendar-week me-3 fs-6"></i>
             <span>Schedule Calendar</span>
         </a>
-
-        @* <a asp-controller="User" asp-action="Analytics"
-           class="nav-link-custom d-flex align-items-center px-3 py-2 mb-1 @(isUserArea && currentAction == "Analytics" ? "active" : "")">
-            <i class="bi bi-graph-up me-3 fs-6"></i>
-            <span>Analytics</span>
-        </a>
-
-        <a asp-controller="User" asp-action="Reports"
-           class="nav-link-custom d-flex align-items-center px-3 py-2 mb-1 @(isUserArea && currentAction == "Reports" ? "active" : "")">
-            <i class="bi bi-file-earmark-bar-graph me-3 fs-6"></i>
-            <span>Reports</span>
-        </a> *@
 
         <a asp-controller="User" asp-action="Settings"
            class="nav-link-custom d-flex align-items-center px-3 py-2 mb-1 @(isUserArea && currentAction == "Settings" ? "active" : "")">

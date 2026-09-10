@@ -24,7 +24,7 @@ builder.Services.AddAuthentication("Login")
     });
 
 builder.Services.AddDbContext<ShuttlOpsDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(Dbconnection.GetConnectionString()));
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSignalR();

@@ -109,7 +109,7 @@ const CreateUser = (forms) => {
                     hideLoading();
                     if (response.success) {
                         showAlertWithCallback("success", response.message || "User created successfully!", () => {
-                            window.location.href = UB + (response.redirectUrl || "/Admin/Users");
+                            $("#UserManagementTable").DataTable.ajax.reload();
                         });
                     } else {
                         showAlert("error", response.message || "An error occurred while creating the user.");

@@ -4,6 +4,7 @@ using ShuttlOps.Models;
 using ShuttlOps.Services.Interfaces;
 using System.Net;
 using System.Net.Mail;
+using DotNetEnv;
 
 namespace ShuttlOps.Services.MainServices
 {
@@ -12,15 +13,18 @@ namespace ShuttlOps.Services.MainServices
         ILogger<EmailService> logger,
         IConfiguration configuration) : IEmailService
     {
-        private readonly string _smtpHost = configuration["Email:SmtpHost"] ?? "smtp.gmail.com";
-        private readonly int _smtpPort = int.TryParse(configuration["Email:SmtpPort"], out var port) ? port : 587;
-        private readonly string _smtpUser = configuration["Email:SmtpUser"] ?? "";
-        private readonly string _smtpPass = configuration["Email:SmtpPassword"] ?? "";
-        private readonly string _fromAddress = configuration["Email:FromAddress"] ?? "noreply@shuttlops.com";
-        private readonly string _fromName = configuration["Email:FromName"] ?? "ShuttlOps";
-
         public async Task SendAutoEmailNotification(EmailDTO email)
         {
+            Env.Load();
+
+            string? _smtpHost = Environment.GetEnvironmentVariable("Email__SmtpHost");
+            string? _smtpUser = Environment.GetEnvironmentVariable("Email__SmtpUser");
+            int _smtpPort = int.Parse(Environment.GetEnvironmentVariable("Email__SmtpPort") ?? "587");
+            string? _smtpPass = Environment.GetEnvironmentVariable("Email__SmtpPassword");
+            string? _fromAddress = Environment.GetEnvironmentVariable("Email__FromAddress");
+            string? _fromName = Environment.GetEnvironmentVariable("Email__FromName");
+
+
             if (email == null || email.EmailRecipients == null || !email.EmailRecipients.Any())
             {
                 logger.LogWarning("SendAutoEmailNotification called with null or empty recipients.");

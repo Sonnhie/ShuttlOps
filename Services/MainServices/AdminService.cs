@@ -1,3 +1,4 @@
+using DotNetEnv;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -240,7 +241,7 @@ namespace ShuttlOps.Services.MainServices
 
                                 <p style='text-align: center; margin: 30px 0;'>
                                     <a href='{loginUrl}' style='background-color: #0d6efd; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;'>
-                                        {loginUrl}
+                                       Sign in
                                     </a>
                                 </p>
 
@@ -361,6 +362,10 @@ namespace ShuttlOps.Services.MainServices
         {
             try
             {
+                Env.Load();
+
+                string? _AppbaseUrl = Environment.GetEnvironmentVariable("Email__AppBaseUrl");
+
                 var isUserExist = await dbContext.UserTables.Include(u => u.Role).FirstOrDefaultAsync(x => x.Id == id);
                 if (isUserExist == null)
                 {
@@ -372,6 +377,62 @@ namespace ShuttlOps.Services.MainServices
                 {
                     return (false, "General Affairs cannot reset Admin passwords.");
                 }
+
+                if (!string.IsNullOrWhiteSpace(isUserExist.EmailAdd))
+                {
+                    try
+                    {
+                        var request = httpContextAccessor.HttpContext?.Request;
+                        var systemUrl = _AppbaseUrl
+                            ?? (request != null ? $"{request.Scheme}://{request.Host}" : "http://localhost:8080/ShuttlOps");
+
+                        var loginUrl = $"{systemUrl}/Account/Login";
+
+                        var emailBody = $@"
+                            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;'>
+                                <h2 style='color: #198754;'>Password Reset Successful</h2>
+                                <p>Hello <strong>{isUserExist.EmployeeName}</strong>,</p>
+                                <p>Your password for the <strong>Shuttl Operation Portal</strong> has been updated successfully.</p>
+        
+                                <div style='background-color: #f8f9fa; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #198754;'>
+                                    <p style='margin: 0;'><strong>Account ID / Username:</strong> <span style='color: #212529;'>{isUserExist.UserName}</span></p>
+                                    <p style='margin: 0;'><strong>Default Password:</strong> <span style='color: #212529;'>Password01</span></p>
+                                    <p style='margin: 5px 0 0 0;'><strong>Date & Time:</strong> <span style='color: #212529;'>{DateTime.UtcNow:yyyy-MM-dd HH:mm} UTC</span></p>
+                                </div>
+
+                                <div style='background-color: #f8d7da; color: #842029; padding: 12px; border-left: 4px solid #dc3545; margin-bottom: 20px; border-radius: 4px;'>
+                                    <strong>Didn't request this change?</strong> If you did not reset your password, please contact your System Administrator or IT Support immediately to secure your corporate account.
+                                </div>
+
+                                <p style='text-align: center; margin: 30px 0;'>
+                                    <a href='{loginUrl}' style='background-color: #0d6efd; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;'>
+                                       Sign In to Portal
+                                    </a>
+                                </p>
+
+                                <hr style='border: none; border-top: 1px solid #eee; margin: 20px 0;' />
+                                <p style='font-size: 12px; color: #6c757d; text-align: center;'>
+                                    This is an automated notification. Please do not reply directly to this email.
+                                </p>
+                            </div>";
+
+                        var emailDto = new EmailDTO
+                        {
+                            Subject = "Welcome to ShuttlOps - Your Account Credentials",
+                            Body = emailBody,
+                            IsHtml = true,
+                            EmailRecipients = [isUserExist.EmailAdd.Trim()]
+                        };
+
+                        await emailService.SendAutoEmailNotification(emailDto);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log SMTP failures without failing the user account creation
+                        logger.LogError(ex, "User {EmployeeID} was created, but failed to send welcome email.", isUserExist.UserName);
+                    }
+                }
+
 
                 string hashedPassword = BCrypt.Net.BCrypt.HashPassword("Password01");
                 isUserExist.Password = hashedPassword;
